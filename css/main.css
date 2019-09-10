@@ -1,5 +1,6 @@
 html, body {
     overflow: auto;
+    cursor:url(../images/ochand.png) 1 17, auto;
 }
 
 .main{
