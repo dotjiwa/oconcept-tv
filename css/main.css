@@ -1,3 +1,8 @@
+@font-face {
+    font-family: "Apple II Screen Typeface";
+    src: url("fonts/AppleIIScreenTypeface.ttf");
+    }
+
 html, body {
     overflow: auto;
     cursor:url(../images/ochand.png) 1 17, auto;
@@ -12,6 +17,22 @@ html, body {
     margin-left: -100px;
     width: 2000;
     height: auto;
+}
+
+.channeldisplay{
+    position: absolute;
+    top: 180;
+    left: 810;
+    text-align: center;
+    background: #444242;
+    border-radius: 4px;
+    opacity: .9;
+    font-family: 'Apple II Screen Typeface', sans-serif;
+    font-size: 38;
+    width: 55;
+    height: 50;
+    color: #bd3636;
+    display:none;
 }
 
 .oldtvscreen{

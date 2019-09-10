@@ -11,10 +11,13 @@ async function main() {
     addVideoChannels();
 
     await animateOldTv();
+    
+    $(".channeldisplay").show();
 
     getUserVideo();
 
     $(".tvremotecontainer").show();
+    
 
     // var phrase = "Let me tell you a story";
     // await animatePhrase(phrase);
