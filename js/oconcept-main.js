@@ -14,6 +14,8 @@ async function main() {
 
     getUserVideo();
 
+    $(".tvremotecontainer").show();
+
     // var phrase = "Let me tell you a story";
     // await animatePhrase(phrase);
 }
@@ -40,25 +42,31 @@ async function animateOldTv() {
             "righttolefttop");
 
         await tv.animateImage();
-        $(".channelVideoContainer").show();
+        $(".channelvideocontainer").show();
         resolve();
     });
 
 }
 
 function addVideoChannels() {
-    var videoContainer = $(".channelVideoContainer");
+    var videoContainer = $(".channelvideocontainer");
     var channels = new OConceptChannelVideos();
     for (let index = 0; index < channels.Videos.length; index++) {
         const video = channels.Videos[index];
-        var vidHtml = "<video id='" + video.videoName + "' class='channelVideo' src='"+video.videoUrl+"'></video>";
+        var cssClassStr = "";
+        for (let c = 0; c < video.cssClasses.length; c++) {
+            cssClassStr += video.cssClasses[c] + " ";
+        }
+        var vidHtml = "<video id='" + video.videoName + "' class='"+cssClassStr.trim()+"'></video>";
         videoContainer.append(vidHtml);
-        //preloadVideo(video.videoUrl, video.videoName);
+        preloadVideo(video.videoUrl, video.videoName);
     }
 }
 
 function preloadVideo(vidUrl, videoName) {
-    var video = document.getElementById("#" + videoName);
+    var video = document.getElementById(videoName);
+
+    setVideoEvents(videoName, video);
 
     var req = new XMLHttpRequest();
     req.open('GET', vidUrl, true);
@@ -78,6 +86,8 @@ function preloadVideo(vidUrl, videoName) {
     req.onerror = function (err) {
         console.log(err.message);
     }
+
+    req.send();
     
 }
 
@@ -173,6 +183,24 @@ async function animatePhrase(phrase) {
 }
 var audio;
 function registerEvents(){
+    $("#buttononoff").on("click", function(){
+        //Turn on
+        if(!($("#statictv").is(":visible"))){
+            $("#TVTurningOn").show();
+            document.getElementById("TVTurningOn").play().catch((err) => console.log(err.message));
+        }
+        else{ //Turn off
+            // if(!($("#usertvscreen").is(":visible")))
+            //      $(".oldtvscreen").show();
+            $(".channelvideo").hide();
+            $("#TVTurningOff").show();
+            STATIC = false;
+            $("#statictv").hide();
+            document.getElementById("TVTurningOff").play().catch((err) => console.log(err.message));
+        }
+    })
+
+
     $(".sound").on("click", function(){
         $(".sound > .yes").toggle();
         $(".sound > .no").toggle();
@@ -198,3 +226,26 @@ function checkUrl(url) {
     // this will return 200 on success, and 0 or negative value on error
 }
 
+function setVideoEvents(videoName, video){
+    //video clip tv turning on events
+    if(videoName == "TVTurningOn"){
+        video.onended = function(e) {
+            $("#TVTurningOn").hide();
+
+            //display static canvas to provide width
+            $("#statictv").show();
+            //turn on static
+            if(STATIC==true)
+                startStatic();
+            else
+                restartStatic();
+        };
+    }
+    //video clip tv turning off events
+    if(videoName == "TVTurningOff"){
+        video.onended = function(e) {
+            $("#TVTurningOff").hide();
+        };
+    }
+
+}
