@@ -2,20 +2,102 @@
 
 //Page load
 $(window).on("load", function () {
-
     main();
+    registerEvents();
 });
 
 async function main() {
-    //animateQuotesTitleGraphic();
 
-    await animateEye();
+    addVideoChannels();
 
-    await animateSquare();
+    await animateOldTv();
 
-    var phrase = "Let me tell you a story";
-    await animatePhrase(phrase);
+    getUserVideo();
 
+    // var phrase = "Let me tell you a story";
+    // await animatePhrase(phrase);
+}
+
+async function animateOldTv() {
+    return new Promise(async (resolve, reject) => {
+        var url = "datafiles/oldtv.json";
+        var data;
+        if (checkUrl(url)) {
+
+            //Load image data from files
+            data = await $.getJSON(url, { format: "json" });
+            console.log("DATA FILE PATH PROCESSED : " + url + " Length: " + data.length);
+        }
+
+        var tv = new OConceptAnimate(
+            "oldtv",
+            [],
+            "images/oldtvphoto1.png",
+            "oldtvcontainer",
+            data,
+            10000,
+            "all",
+            "righttolefttop");
+
+        await tv.animateImage();
+        $(".channelVideoContainer").show();
+        resolve();
+    });
+
+}
+
+function addVideoChannels() {
+    var videoContainer = $(".channelVideoContainer");
+    var channels = new OConceptChannelVideos();
+    for (let index = 0; index < channels.Videos.length; index++) {
+        const video = channels.Videos[index];
+        var vidHtml = "<video id='" + video.videoName + "' class='channelVideo' src='"+video.videoUrl+"'></video>";
+        videoContainer.append(vidHtml);
+        //preloadVideo(video.videoUrl, video.videoName);
+    }
+}
+
+function preloadVideo(vidUrl, videoName) {
+    var video = document.getElementById("#" + videoName);
+
+    var req = new XMLHttpRequest();
+    req.open('GET', vidUrl, true);
+    req.responseType = 'blob';
+
+    req.onload = function () {
+        // Onload is triggered even on 404
+        // so we need to check the status code
+        if (this.status === 200) {
+            var videoBlob = this.response;
+            var vid = URL.createObjectURL(videoBlob); // IE10+
+            // Video is now downloaded
+            // and we can set it as source on the video element
+            video.src = vid;
+        }
+    }
+    req.onerror = function (err) {
+        console.log(err.message);
+    }
+    
+}
+
+function getUserVideo(){
+
+    // Grab elements, create settings, etc.
+    var video = document.getElementById('usertvscreen');
+
+        // Get access to the camera!
+        if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            // Not adding `{ audio: true }` since we only want video now
+            navigator.mediaDevices.getUserMedia({ video: true }).then(function(stream) {
+                //video.src = window.URL.createObjectURL(stream);
+                video.srcObject = stream;
+                video.play();
+                $("#usertvscreen").show();
+                $(".oldtvscreen").hide();
+            });
+        }
+           
 }
 
 async function animatePhrase(phrase) {
@@ -69,10 +151,6 @@ async function animatePhrase(phrase) {
         //add containers for each word
         for (let i = 0; i < words.length; i++) {
             $(".canvascontainer").append("<div class='word " + words[i] + "'></div>");
-            //     if(i == 0)
-            //         $(".canvascontainer").append("<div class='word " + words[i] + "'></div>");
-            //     else
-            //          document.getElementsByClassName(words[i - 1])[0].insertAdjacentHTML("afterend", "<div class='word " + words[i] + "'></div>");
         }
 
         for (var i = 0; i < phraseCharactersToAnimate.length; i++) {
@@ -93,6 +171,22 @@ async function animatePhrase(phrase) {
         resolve();
     });
 }
+var audio;
+function registerEvents(){
+    $(".sound").on("click", function(){
+        $(".sound > .yes").toggle();
+        $(".sound > .no").toggle();
+    
+        if($(".sound > .yes").is(":visible")){
+            audio = new Audio('audio/CleverSkipper.mp3');
+            audio.loop = true;
+            audio.play().catch((err) => console.log(err.message));
+        }
+        else{
+            audio.pause().catch((err) => console.log(err.message));
+        }
+    });
+}
 
 function checkUrl(url) {
     var http = $.ajax({
@@ -104,115 +198,3 @@ function checkUrl(url) {
     // this will return 200 on success, and 0 or negative value on error
 }
 
-async function animateSquare() {
-    return new Promise(async (resolve, reject) => {
-        var url = "datafiles/squareTV.json";
-        var data;
-        if (checkUrl(url)) {
-
-            //Load image data from files
-            data = await $.getJSON(url, { format: "json" });
-            console.log("DATA FILE PATH PROCESSED : " + url + " Length: " + data.length);
-        }
-
-        var square = new OConceptAnimate(
-            "squaretv",
-            [],
-            "images/squareTV.png",
-            "squaretvcontainer",
-            data,
-            1000,
-            "all",
-            "toptobottom");
-
-        await square.animateImage();
-        $(".squaretvbackground").show();
-        resolve();
-    });
-
-}
-
-async function animateEye() {
-    return new Promise(async (resolve, reject) => {
-        var url = "datafiles/eye.json";
-        var data;
-        if (checkUrl(url)) {
-
-            //Load image data from files
-            data = await $.getJSON(url, { format: "json" });
-            console.log("DATA FILE PATH PROCESSED : " + url + " Length: " + data.length);
-        }
-
-        var eye = new OConceptAnimate(
-            "eye",
-            [],
-            "images/eyeicon1-I.png",
-            "canvascontainer",
-            data,
-            100,
-            "all",
-            "toptobottom");
-
-        await eye.animateImage();
-        resolve();
-    });
-
-}
-
-async function animateQuotesTitleGraphic() {
-
-    var url = "datafiles/quotestitlegraphic.json";
-    var data;
-    if (checkUrl(url)) {
-
-        //Load image data from files
-        data = await $.getJSON(url, { format: "json" });
-        console.log("DATA FILE PATH PROCESSED : " + url + " Length: " + data.length);
-    }
-
-    var quotes = new OConceptAnimate(
-        "quotes",
-        [],
-        "images/quotestitlepagedraft.jpg",
-        "canvascontainer",
-        data,
-        1000,
-        "all",
-        "bottomtotop");
-
-    await quotes.animateImage();
-
-}
-
-function addVideoChannels() {
-    var videoContainer = $(".channelVideoContainer");
-    for (let index = 0; index < OConnceptChannelVideos.Videos.length; index++) {
-        const video = OConnceptChannelVideos.Videos[index];
-        var vidHtml = "<video id='" + video.videoName + "' class='channelVideo' src='' controls></video>";
-        videoContainer.append(vidHtml);
-        preloadVideo(video.videoUrl, video.videoName);
-    }
-}
-
-function preloadVideo(vidUrl, videoName) {
-    var video = $("#" + videoName);
-
-    var req = new XMLHttpRequest();
-    req.open('GET', vidUrl, true);
-    req.responseType = 'blob';
-
-    req.onload = function () {
-        // Onload is triggered even on 404
-        // so we need to check the status code
-        if (this.status === 200) {
-            var videoBlob = this.response;
-            var vid = URL.createObjectURL(videoBlob); // IE10+
-            // Video is now downloaded
-            // and we can set it as source on the video element
-            video.src = vid;
-        }
-    }
-    req.onerror = function () {
-        // Error
-    }
-}

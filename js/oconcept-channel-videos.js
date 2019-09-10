@@ -1,8 +1,8 @@
 "use strict";
 
-var OConnceptChannelVideos = function(){
+var OConceptChannelVideos = function(){
 }
 
-OConnceptChannelVideos.prototype.Videos = [
-    {channel: 01, videoName:"letter", videoUrl: "lower", cssClass:"" }
+OConceptChannelVideos.prototype.Videos = [
+    {channel: '01', videoName:"Wreckless", videoUrl: "video/wreckless.mp4", videoClickUrl:"", cssClasses:["video"] }
 ]

@@ -314,8 +314,8 @@ function findStartingPoint(imagePointMap){
     switch(StartDirection){
 
       case "righttolefttop" : 
-            for (x = 1; x < xboundary; x++){
-                for (y = 1; y < yboundary; y++){
+            for (x = 0; x < xboundary; x++){
+                for (y = 0; y < yboundary; y++){
                     var point = getImagePointFromMap(x, y, imagePointMap);
                     var pointData = point.pixelData.data;
                     if(pointData[3] > 0)
@@ -324,8 +324,8 @@ function findStartingPoint(imagePointMap){
             }
             break;
        case "righttoleftbottom" : 
-            for (x = 1; x < xboundary; x++){
-                for (y = yboundary; y > 1; y--){
+            for (x = 0; x < xboundary; x++){
+                for (y = yboundary; y > 0; y--){
                     var point = getImagePointFromMap(x, y, imagePointMap);
                     var pointData = point.pixelData.data;
                     if(pointData[3] > 0)
@@ -335,7 +335,7 @@ function findStartingPoint(imagePointMap){
             break;
         case "lefttorighttop" : 
             for (x = xboundary; x > 0; x--){
-                for (y = 1; y < yboundary; y++){
+                for (y = 0; y < yboundary; y++){
                     var point = getImagePointFromMap(x, y, imagePointMap);
                     var pointData = point.pixelData.data;
                     if(pointData[3] > 0)
@@ -354,8 +354,8 @@ function findStartingPoint(imagePointMap){
             }
             break;
         case "toptobottom" : 
-            for (y = 1; y < yboundary; y++){
-                for (x = 1; x < xboundary; x++){
+            for (y = 0; y < yboundary; y++){
+                for (x = 0; x < xboundary; x++){
                     var point = getImagePointFromMap(x, y, imagePointMap);
                     var pointData = point.pixelData.data;
                     if(pointData[3] > 0)
@@ -365,7 +365,7 @@ function findStartingPoint(imagePointMap){
                 break;
         case "bottomtotop" : 
             for (y = yboundary; y > 0; y--){
-                for (x = 1; x < xboundary; x++){
+                for (x = 0; x < xboundary; x++){
                     var point = getImagePointFromMap(x, y, imagePointMap);
                     var pointData = point.pixelData.data;
                     if(pointData[3] > 0)
@@ -379,8 +379,8 @@ function findStartingPoint(imagePointMap){
 //Gets Full Map of Image Pixels
 function loadFullImagePoints(ctx, width, height){
     var imagePointMap = [];
-    for (var x = 1; x < width + 1; x++){
-        for (var y = 1; y < height + 1; y++){
+    for (var x = 0; x < width; x++){
+        for (var y = 0; y < height; y++){
         var pixelData =  ctx.getImageData(x, y, 1, 1);
             imagePointMap.push({x:x, y:y, pixelData:pixelData});
         }

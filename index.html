@@ -1,16 +1,33 @@
 <html>
     <head>
         <link rel="stylesheet" type="text/css" href="css/main.css">
+        <link rel="stylesheet" type="text/css" href="css/statictv.css">
         <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+        <script src="js/statictv.js"></script>
         <script src="js/oconcept-utility.js"></script>
         <script src="js/oconcept-animate.js"></script>
         <script src="js/oconcept-animate-letters.js"></script>
+        <script src="js/oconcept-channel-videos.js"></script>
         <script src="js/oconcept-main.js"></script>
     </head>
     <body>
         <div class="main">
-            <div class="squaretvcontainer"></div>
-            <div class="squaretvbackground"></div>
+            <div class="sound">
+                <img class="yes" src="images/recordsound.png">
+                <img class="no" src="images/recordnosound.png">
+            </div>
+            <div class="oldtvcontainer"></div>
+            <div class="channelVideoContainer">
+                <video id="usertvscreen" autoplay></video>
+                <img class="oldtvscreen" src="images/oldtvscreen.png">
+                <canvas id="statictv"></canvas>
+            </div>
+            <div class="oldtvremotecontainer">
+                <img class="oldtvremote" src="images/oldtvremoteskewed.png">
+                <div id="buttononoff" class="remotebutton"></div>
+                <div id="buttonchannelup" class="remotebutton"></div>
+                <div id="buttonchanneldown" class="remotebutton"></div>
+            </div>
             <div class="canvasboard">
                 <div class="canvascontainer"></div>
             </div>

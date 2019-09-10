@@ -3,37 +3,104 @@ html, body {
 }
 
 .main{
-    height:100vh;
-    width: 100%;
 
 }
 
-.squaretvcontainer{
+.oldtv{
+    margin-top: -50px;
+    margin-left: -100px;
+    width: 2000;
+    height: auto;
+}
+
+.oldtvscreen{
+    height: 525px;
+    width: inherit;
+}
+
+.oldtvremote{
+    width:300px;
+    height:auto;
+}
+
+.remotebutton{
+    width: 16px;
+    height: 16px;
+    background: red;
+    display: inline-block;
     position: absolute;
-    top: 1%;
-    left: 0;
-    height: 100%;
-    z-index: 100;
 }
 
-.squaretv{
-    width: 100%;
-    height: 100%;
+#buttononoff{
+    left: 103px;
+    top: 115px;
 }
 
-.squaretvbackground{
-    z-index: 10;
+#buttonchannelup{
+    left: 132px;
+    top: 105px;
+}
+
+#buttonchanneldown{
+    left: 150px;
+    top: 140px;
+}
+
+.oldtvremotecontainer{
+    display: inline-block;
     position: absolute;
-    top: 1%;
-    left: 0;
-    height: 90%;
-    width: 95%;
-    margin-top: 3%;
-    margin-left: 3%;
-    margin-right: 8%;
-    margin-bottom: 5%;
-    background-color: #EAF7F8;
+    right: 350;
+    z-index: 1000;
+    transform: rotate(-5deg);
+}
+
+#usertvscreen{
+    height: 450px;
+    width: 575px;
+    margin-top: 50px;
+    opacity: .3;
     display:none;
+}
+
+.channelVideo{
+    display: none;
+    height: 450px;
+    margin-top: 50px;
+}
+
+.channelVideoContainer{
+    z-index: 10;
+    height: 500px;
+    width: 575px;
+    margin-left: 170px;
+    margin-top: 60px;
+    display: none;
+    position:relative;
+    overflow: hidden;
+}
+
+.oldtvcontainer{
+    position: absolute;
+    top: 1%;
+    left: 0;
+    height: 100%;
+    z-index:1000;
+}
+
+.sound{
+    height:40px;
+    width:40px;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    z-index:10000 !important;
+}
+.sound > .yes{
+    display:none;
+    height:inherit;
+}
+.sound > .no{
+    height:inherit;
 }
 
 .canvasimage{
@@ -110,3 +177,4 @@ html, body {
     margin-right: 30px;
     height:70px;
 }
+
