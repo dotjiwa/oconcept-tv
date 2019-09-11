@@ -152,9 +152,9 @@ function runAnimation(){
             var pointData = currentPoint.pixelData.data;
             data32[currentPoint.y * xboundary + currentPoint.x] =
                 (pointData[3]  << 24) |	// alpha
-                (pointData[2] & 0xff << 16) |	// blue
-                (pointData[1] & 0xff  <<  8) |	// green
-                 pointData[0] & 0xff; 		// red
+                (pointData[2]  << 16) |	// blue
+                (pointData[1]  <<  8) |	// green
+                 pointData[0]; 		// red
 
             currentPointIteration++;
         }

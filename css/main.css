@@ -1,7 +1,7 @@
-@font-face {
+/* @font-face {
     font-family: "Apple II Screen Typeface";
-    src: url("fonts/AppleIIScreenTypeface.ttf");
-    }
+    src: url("/fonts/AppleIIScreenTypeface.ttf");
+    } */
 
 html, body {
     overflow: auto;
@@ -49,10 +49,14 @@ html, body {
 }
 
 .channelvideo{
+    width: inherit;
     height: inherit;
-    width:inherit;
+    object-fit: cover;
+    overflow: hidden;
     position: absolute;
     top: 0;
+    left:0;
+    display:none;
 }
  .tvturning{
     position: absolute; 
@@ -60,17 +64,15 @@ html, body {
     bottom: 0;
     min-width: 100%; 
     min-height: 100%;
-    width: auto; 
-    height: auto; 
+    width: auto;
+    height: auto;
+    object-fit: fill;
     background-size: cover;
     overflow: hidden;
     opacity:.7;
     margin-top: -120;
  }
 
-#Wreckless, #TVTurningOn, #TVTurningOff{
-    display:none;
-}
 
 .channelvideocontainer{
     z-index: 10;

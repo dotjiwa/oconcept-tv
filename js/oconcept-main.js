@@ -8,16 +8,21 @@ $(window).on("load", function () {
 
 async function main() {
 
+    //Start preloading video
     addVideoChannels();
 
+    //Animate TV
     await animateOldTv();
-    
+
+    //Show channel display after TV done
     $(".channeldisplay").show();
 
+    //Make request to fill tv reflection with user video
     getUserVideo();
 
+    //Show the remote
     $(".tvremotecontainer").show();
-    
+
 
     // var phrase = "Let me tell you a story";
     // await animatePhrase(phrase);
@@ -51,16 +56,19 @@ async function animateOldTv() {
 
 }
 
+var currentChannel = null;
+
 function addVideoChannels() {
     var videoContainer = $(".channelvideocontainer");
     var channels = new OConceptChannelVideos();
+    currentChannel = channels.Videos[0];
     for (let index = 0; index < channels.Videos.length; index++) {
         const video = channels.Videos[index];
         var cssClassStr = "";
         for (let c = 0; c < video.cssClasses.length; c++) {
             cssClassStr += video.cssClasses[c] + " ";
         }
-        var vidHtml = "<video id='" + video.videoName + "' class='"+cssClassStr.trim()+"'></video>";
+        var vidHtml = "<video id='" + video.videoName + "' class='" + cssClassStr.trim() + "'></video>";
         videoContainer.append(vidHtml);
         preloadVideo(video.videoUrl, video.videoName);
     }
@@ -84,6 +92,7 @@ function preloadVideo(vidUrl, videoName) {
             // Video is now downloaded
             // and we can set it as source on the video element
             video.src = vid;
+            video.loop = true;
         }
     }
     req.onerror = function (err) {
@@ -91,26 +100,63 @@ function preloadVideo(vidUrl, videoName) {
     }
 
     req.send();
-    
+
 }
 
-function getUserVideo(){
+function getUserVideo() {
 
     // Grab elements, create settings, etc.
     var video = document.getElementById('usertvscreen');
 
-        // Get access to the camera!
-        if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            // Not adding `{ audio: true }` since we only want video now
-            navigator.mediaDevices.getUserMedia({ video: true }).then(function(stream) {
+    // Get access to the camera!
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        // Not adding `{ audio: true }` since we only want video now
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function (stream) {
                 //video.src = window.URL.createObjectURL(stream);
                 video.srcObject = stream;
                 video.play();
                 $("#usertvscreen").show();
                 $(".oldtvscreen").hide();
-            });
+            })
+            .catch((err) => console.log("Access user camera : " + err.message));;
+    }
+
+}
+
+function goToNextChannel() {
+
+    //Pause current channel
+    var currentChannelVideo = $("#" + currentChannel.videoName);
+    currentChannelVideo.trigger("pause");
+    currentChannelVideo.hide();
+
+    if (!($("#statictv").is(":visible")))
+        showStatic();
+
+        //Find next channel
+        var channels = new OConceptChannelVideos().Videos;
+        var nextChannel;
+        var nextChannels = channels.filter(function (c) {
+            return c.channelNumber == currentChannel.channelNumber + 1;
+        })
+        if (nextChannels.length > 0)
+            nextChannel = nextChannels[0];
+        else
+            nextChannel = channels[0]; // if no next channel, go back to channel 00
+
+        //Play next channel video
+        if (nextChannel.channelNumber > 0) {
+            var nextChannelVideo = $("#" + nextChannel.videoName);
+            nextChannelVideo.trigger("play");
+            nextChannelVideo.show();
+            hideStatic();
         }
-           
+
+        $(".channeldisplay").text(nextChannel.channel);
+
+        currentChannel = nextChannel;
+
 }
 
 async function animatePhrase(phrase) {
@@ -185,35 +231,39 @@ async function animatePhrase(phrase) {
     });
 }
 var audio;
-function registerEvents(){
-    $("#buttononoff").on("click", function(){
+function registerEvents() {
+    $("#buttononoff").on("click", function () {
         //Turn on
-        if(!($("#statictv").is(":visible"))){
+        if (!($("#statictv").is(":visible"))) {
             $("#TVTurningOn").show();
             document.getElementById("TVTurningOn").play().catch((err) => console.log(err.message));
         }
-        else{ //Turn off
+        else { //Turn off
             // if(!($("#usertvscreen").is(":visible")))
             //      $(".oldtvscreen").show();
+            $(".channelvideo").trigger("pause");
             $(".channelvideo").hide();
             $("#TVTurningOff").show();
-            STATIC = false;
-            $("#statictv").hide();
+            hideStatic();
             document.getElementById("TVTurningOff").play().catch((err) => console.log(err.message));
         }
     })
 
+    $("#buttonchannelup").on("click", function () {
+        goToNextChannel();
+    })
 
-    $(".sound").on("click", function(){
+
+    $(".sound").on("click", function () {
         $(".sound > .yes").toggle();
         $(".sound > .no").toggle();
-    
-        if($(".sound > .yes").is(":visible")){
+
+        if ($(".sound > .yes").is(":visible")) {
             audio = new Audio('audio/CleverSkipper.mp3');
             audio.loop = true;
             audio.play().catch((err) => console.log(err.message));
         }
-        else{
+        else {
             audio.pause().catch((err) => console.log(err.message));
         }
     });
@@ -229,26 +279,36 @@ function checkUrl(url) {
     // this will return 200 on success, and 0 or negative value on error
 }
 
-function setVideoEvents(videoName, video){
+function setVideoEvents(videoName, video) {
     //video clip tv turning on events
-    if(videoName == "TVTurningOn"){
-        video.onended = function(e) {
+    if (videoName == "TVTurningOn") {
+        video.onended = function (e) {
             $("#TVTurningOn").hide();
-
-            //display static canvas to provide width
-            $("#statictv").show();
-            //turn on static
-            if(STATIC==true)
-                startStatic();
-            else
-                restartStatic();
+            showStatic();
+            $(".channeldisplay").text("00");
         };
     }
     //video clip tv turning off events
-    if(videoName == "TVTurningOff"){
-        video.onended = function(e) {
+    if (videoName == "TVTurningOff") {
+        video.onended = function (e) {
             $("#TVTurningOff").hide();
+            $(".channeldisplay").text("");
         };
     }
 
+}
+
+function showStatic() {
+    //display static canvas to provide width
+    $("#statictv").show();
+    //turn on static
+    if (STATIC == true)
+        startStatic();
+    else
+        restartStatic();
+}
+
+function hideStatic() {
+    STATIC = false;
+    $("#statictv").hide();
 }
