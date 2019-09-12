@@ -12,6 +12,7 @@ var OConceptAnimate = (function(){
     pixelsPerFrameProcessingRate = 100,
     scanDirection = "all", 
     startDirection = null, 
+    stagedColors = [],
     startingPoint = null
 ) {
 
@@ -24,6 +25,7 @@ var OConceptAnimate = (function(){
         StartDirection = startDirection != null ? startDirection.toLowerCase() : startDirection;
         StartingPoint = startingPoint;
         PixelsPerFrameProcessingRate = pixelsPerFrameProcessingRate;
+        StagedColors = stagedColors;
 }
 
 
@@ -46,7 +48,8 @@ var StartDirection;
 var StartingPoint;
 //Controls the speed of animation - the number of pixels written per frame (framerate is 60 fps) - default is 100
 var PixelsPerFrameProcessingRate;
-
+//Colors to animate in order
+var StagedColors;
 
 var xboundary;
 var yboundary;
@@ -122,6 +125,8 @@ OConceptAnimate.prototype.animateImage = function(){
                 loadPointsToDraw(canvasToCopyContext, imagePointMap);
             }
 
+            //Stage Colors for animation
+
             //Starts the animation at 60 fps
             currentPointIteration = 0;
             ImageData = canvasToDrawOnContext.createImageData(xboundary, yboundary);
@@ -144,9 +149,7 @@ function runAnimation(){
             var currentPoint = PointsToAnimate[currentPointIteration];
 
             if(currentPoint == null){
-                canvasToDrawOnContext.clearRect(0, 0, xboundary, yboundary);
-                canvasToDrawOnContext.drawImage(img, 0, 0, img.width, img.height);
-                return res();
+                return res({context: canvasToDrawOnContext, image:img});
             }
 
             var pointData = currentPoint.pixelData.data;
@@ -166,6 +169,10 @@ function runAnimation(){
 
 function getPixelIndex(x, y) {
     return (y * width + x) * 4; // width used when getting buffer
+}
+
+function StageColorsForAnimation(){
+
 }
 
 //Gets all of the pixels from the Full Map - in order

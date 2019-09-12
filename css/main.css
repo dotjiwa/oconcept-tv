@@ -13,9 +13,9 @@ html, body {
 }
 
 .oldtv{
-    margin-top: -50px;
-    margin-left: -100px;
-    width: 2000;
+    margin-top: 38px;
+    margin-left: 87px;
+    width: 852px;
     height: auto;
 }
 
@@ -111,6 +111,16 @@ html, body {
 #buttonchanneldown{
     left: 150px;
     top: 140px;
+}
+
+#buttonfullscreen{
+    left: 170;
+    top: 173;
+}
+
+#buttonmoreinfo{
+    left: 97;
+    top: 195;
 }
 
 .tvremotecontainer{

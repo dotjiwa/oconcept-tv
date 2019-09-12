@@ -118,8 +118,3 @@ function render() {
     }
 }
 
-function restartStatic() {
-    STATIC = true;
-    window.onresize();
-    window.requestAnimationFrame(render);
-}
