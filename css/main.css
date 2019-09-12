@@ -1,15 +1,16 @@
-/* @font-face {
-    font-family: "Apple II Screen Typeface";
-    src: url("/fonts/AppleIIScreenTypeface.ttf");
-    } */
-
 html, body {
-    overflow: auto;
+    min-height: 1230px;
+    overflow-y: scroll;
+    background-image: url(../images/bicycle.png);
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: cover;
     cursor:url(../images/ochand.png) 1 17, auto;
 }
 
-.main{
 
+.main{
+  
 }
 
 .oldtv{
@@ -38,14 +39,35 @@ html, body {
 .oldtvscreen{
     height: inherit;
     width: inherit;
-    opacity: 0.6;
+    z-index: 10;
+    position: absolute;
+
+    /* opacity: 0.6; */
+}
+
+.usertvscreencontainer{
+    height: inherit;
+    width: inherit;
+    object-fit: cover;
+    display:none;
+    z-index:10;
+    position: absolute;
 }
 
 #usertvscreen{
     height: inherit;
     width: inherit;
-    opacity: .3;
-    display:none;
+    object-fit: cover;
+    opacity: .1;
+    transform: rotateY(180deg);
+    -webkit-transform:rotateY(180deg); /* Safari and Chrome */
+    -moz-transform:rotateY(180deg); /* Firefox */
+    filter:        url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><filter id=\'grayscale\'><feColorMatrix type=\'matrix\' values=\'0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0 0 0 1 0\'/></filter></svg>#grayscale");
+   -webkit-filter: grayscale(100%);
+   -moz-filter:    grayscale(100%);
+   -ms-filter:     grayscale(100%);
+   -o-filter:      grayscale(100%);
+   filter: gray;
 }
 
 .channelvideo{
@@ -57,6 +79,7 @@ html, body {
     top: 0;
     left:0;
     display:none;
+    z-index: 1
 }
  .tvturning{
     position: absolute; 
@@ -83,6 +106,7 @@ html, body {
     display: none;
     position:absolute;
     overflow: hidden;
+    background: #332f2f;
 }
 
 .oldtvremote{
@@ -96,6 +120,7 @@ html, body {
     background: red;
     display: inline-block;
     position: absolute;
+    z-index: 1000000;
 }
 
 #buttononoff{
@@ -128,7 +153,7 @@ html, body {
     position: absolute;
     right: 350;
     top:500;
-    z-index: 1000;
+    z-index: 100000;
     transform: rotate(-5deg);
     display:none;
 }
@@ -139,6 +164,23 @@ html, body {
     left: 0;
     height: 100%;
     z-index:1000;
+}
+
+.moreinfo{
+    border: 1px solid #485b69;
+    border-radius: 5px;
+    opacity: .9;
+    width: 400px;
+    height: 550px;
+    background: white;
+    padding:5px;
+}
+
+.moreinfocontainer{
+    position: absolute;
+    top: 60px;
+    right: 20px;
+    display:none;
 }
 
 .sound{

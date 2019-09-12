@@ -20,7 +20,9 @@
                 <div class="channeldisplay"></div>
             </div>
             <div class="channelvideocontainer">
-                <video id="usertvscreen" autoplay></video>
+                <div class="usertvscreencontainer">
+                    <video id="usertvscreen" autoplay></video>
+                </div>
                 <img class="oldtvscreen" src="images/oldtvscreen.png">
                 <canvas id="statictv"></canvas>
             </div>
@@ -32,9 +34,12 @@
                 <div id="buttonfullscreen" class="remotebutton"></div>
                 <div id="buttonmoreinfo" class="remotebutton"></div>
             </div>
-            <div class="canvasboard">
-                <div class="canvascontainer"></div>
+            <div class="moreinfocontainer">
+                <iframe class="moreinfo"></iframe>
             </div>
+            <!-- <div class="canvasboard">
+                <div class="canvascontainer"></div>
+            </div> -->
         </div>
     </body>
 </html>

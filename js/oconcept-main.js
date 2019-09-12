@@ -3,7 +3,6 @@
 //Page load
 $(window).on("load", function () {
     main();
-    registerEvents();
 });
 
 async function main() {
@@ -23,6 +22,8 @@ async function main() {
     //Show the remote
     $(".tvremotecontainer").show();
 
+    registerEvents();
+
 
     // var phrase = "Let me tell you a story";
     // await animatePhrase(phrase);
@@ -30,14 +31,18 @@ async function main() {
 
 async function animateOldTv() {
     return new Promise(async (resolve, reject) => {
+
+        //Get Image Data Points
         var url = "datafiles/oldtv.json";
         var data;
         if (checkUrl(url)) {
-
             //Load image data from files
             data = await $.getJSON(url, { format: "json" });
-            console.log("DATA FILE PATH PROCESSED : " + url + " Length: " + data.length);
+            logMessage("DATA FILE PATH PROCESSED : " + url + " Length: " + data.length);
         }
+
+        //Designate colors to stage for animation
+        var stagedColors = await determineStagedColors();
 
         var tv = new OConceptAnimate(
             "oldtv",
@@ -47,21 +52,60 @@ async function animateOldTv() {
             data,
             10000,
             "all",
-            "righttolefttop");
+            "righttolefttop",
+            stagedColors);
 
         var animateVariables = await tv.animateImage();
-        //After animate prepare canvas to switch out image
-        animateVariables.context.clearRect(0, 0, animateVariables.image.width, animateVariables.image.height);
 
         //Switch out image to tv without screen
         var noscreenImage = new Image(animateVariables.image.width, animateVariables.image.height)
-        noscreenImage.onload = () => {animateVariables.context.drawImage(noscreenImage, 0, 0, noscreenImage.width, noscreenImage.height); }
+        noscreenImage.onload = () => {
+            //After animate prepare canvas to switch out image
+            animateVariables.context.clearRect(0, 0, animateVariables.image.width, animateVariables.image.height);
+            animateVariables.context.drawImage(noscreenImage, 0, 0, noscreenImage.width, noscreenImage.height);
+        }
         noscreenImage.src = "images/oldtvnoscreen1.png";
 
-        
+
         //show channels
         $(".channelvideocontainer").show();
         resolve();
+    });
+
+}
+
+function determineStagedColors() {
+    return new Promise(async (resolve, reject) => {
+        var stagedColors = []
+        var currentColor = {
+            redLowerLimit: 0,
+            redUpperLimit: 8,
+            greenLowerLimit: 0,
+            greenUpperLimit: 8,
+            blueLowerLimit: 0,
+            blueUpperLimit: 8
+        }
+        stagedColors.push(currentColor);
+
+        var rounds = 255 % 20;
+        for (var i = 0; i < rounds; i++) {
+            if (currentColor.redUpperLimit + 21 < 255 &&
+                currentColor.greenUpperLimit + 21 < 255 &&
+                currentColor.blueUpperLimit + 21 < 255) {
+                var colorRange = {
+                    redLowerLimit: currentColor.redUpperLimit + 1,
+                    redUpperLimit: currentColor.redUpperLimit + 21,
+                    greenLowerLimit: currentColor.greenUpperLimit + 1,
+                    greenUpperLimit: currentColor.greenUpperLimit + 21,
+                    blueLowerLimit: currentColor.blueUpperLimit + 1,
+                    blueUpperLimit: currentColor.blueUpperLimit + 21
+                }
+                stagedColors.push(colorRange);
+                currentColor = colorRange;
+            }
+        }
+
+        resolve(stagedColors);
     });
 
 }
@@ -89,10 +133,10 @@ function addVideoChannels() {
         }
 
         var vidHtml = "<video id='" + video.videoName + "' class='" + cssClassStr.trim() + "'></video>";
-        
+
         //Append video to DOM
         videoContainer.append(vidHtml);
-        
+
         //Preload video for quick play
         preloadVideo(video.videoUrl, video.videoName, video.loop);
     }
@@ -104,21 +148,21 @@ function preloadVideo(vidUrl, videoName, videoLoop) {
 
     //Set all event handlers on video 
     setVideoEvents(videoName, video);
-    
+
     //Preload video 
     fetch(vidUrl)
         .then(function (response) {
-            response.blob().then(function(videoBlob) {
+            response.blob().then(function (videoBlob) {
                 var vid = URL.createObjectURL(videoBlob); // IE10+
                 // Video is now downloaded
                 // and we can set it as source on the video element
                 video.src = vid;
                 video.loop = videoLoop; //set looping 
-              });
+            });
 
         })
         .catch(function (err) {
-            console.log("Something went wrong!", err);
+            logMessage("Error loading video : " + err.message);
         });
 
 }
@@ -137,10 +181,12 @@ function getUserVideo() {
                 //video.src = window.URL.createObjectURL(stream);
                 video.srcObject = stream;
                 video.play();
-                $("#usertvscreen").show();
+                $(".usertvscreencontainer").show();
                 $(".oldtvscreen").hide();
             })
-            .catch((err) => console.log("Access user camera : " + err.message));;
+            .catch((err) => {
+                logMessage("Access user camera : " + err.message)
+            });
     }
 
 }
@@ -198,10 +244,10 @@ function goToLastChannel() {
     var nextChannels = channels.filter(function (c) {
         return c.channelNumber == currentChannel.channelNumber - 1;
     })
-    if (nextChannels.length > 0)
+    if (nextChannels.length > 0 && nextChannels[0].channelNumber != -1)
         nextChannel = nextChannels[0];
     else
-        nextChannel = channels[channels.length - 3]; // if no last channel, go back to top channel
+        nextChannel = channels[channels.length - 1]; // if no last channel, go back to top channel
 
     //Play next channel video
     if (nextChannel.channelNumber > 0) {
@@ -292,45 +338,68 @@ async function animatePhrase(phrase) {
 var audio;
 function registerEvents() {
     $("#buttononoff").on("click", function (e) {
-        e.preventDefault();
         //Turn on
-        if (!($("#statictv").is(":visible")) && !($(".channelvideo").is(":visible")) ) {
+        if (!($("#statictv").is(":visible")) && !($(".channelvideo").is(":visible"))) {
             $("#TVTurningOn").show();
-            document.getElementById("TVTurningOn").play().catch((err) => console.log(err.message));
+
+            $(".oldtvscreen").css("opacity", ".2");
+
+            document.getElementById("TVTurningOn").play().catch((err) => { logMessage(err.message) });
         }
         else { //Turn off
-            // if(!($("#usertvscreen").is(":visible")))
-            //      $(".oldtvscreen").show();
+
+            currentChannel = new OConceptChannelVideos().Videos[0];
             $(".channelvideo").trigger("pause");
             $(".channelvideo").hide();
             $("#TVTurningOff").show();
             hideStatic();
-            document.getElementById("TVTurningOff").play().catch((err) => console.log(err.message));
+            document.getElementById("TVTurningOff").play().catch((err) => { logMessage(err.message) });
         }
     });
 
     //Channel up event
     $("#buttonchannelup").on("click", function (e) {
-        e.preventDefault();
         goToNextChannel();
     })
 
     //Channel down event
     $("#buttonchanneldown").on("click", function (e) {
-        e.preventDefault();
         goToLastChannel();
     })
 
     //Full screen event
     $("#buttonfullscreen").on("click", function (e) {
-        e.preventDefault();
-        if((window.fullScreen) ||
-         (window.innerWidth == screen.width && window.innerHeight == screen.height)) 
+        if ((window.fullScreen) ||
+            (window.innerWidth == screen.width && window.innerHeight == screen.height))
             closeFullscreen();
-         else {
+        else {
             var video = document.getElementById(currentChannel.videoName);
             openFullscreen(video);
         }
+    })
+
+    //More Info event 
+    $("#buttonmoreinfo").on("click", function (e) {
+
+        var url; 
+        if(currentChannel.videoClickType == "wikipedia"){
+            var wikiTitle = currentChannel.videoClickUrl.substr(currentChannel.videoClickUrl.lastIndexOf("/") + 1);
+            url = "https://en.wikipedia.org/w/index.php?title=" + wikiTitle + '&printable=yes';
+        }
+        
+        var iframe = document.getElementsByClassName("moreinfo")[0];
+        iframe.onload = () => {
+            // $("#mw-page-base").hide();
+            // $("#mw-head-base").hide();
+            // $("#mw-data-after-content").hide();
+            // $("#mw-navigation").hide();
+            // $("#footer").hide();
+            // $(".mw-body").css("margin-left", "0");
+        }
+        iframe.src = url;
+
+
+        $(".moreinfocontainer").show();
     })
 
     $(".sound").on("click", function (e) {
@@ -341,10 +410,10 @@ function registerEvents() {
         if ($(".sound > .yes").is(":visible")) {
             audio = new Audio('audio/CleverSkipper.mp3');
             audio.loop = true;
-            audio.play().catch((err) => console.log(err.message));
+            audio.play().catch((err) => logMessage(err.message));
         }
         else {
-            audio.pause().catch((err) => console.log(err.message));
+            audio.pause().catch((err) => logMessage(err.message));
         }
     });
 }
@@ -356,6 +425,8 @@ function setVideoEvents(videoName, video) {
             $("#TVTurningOn").hide();
             showStatic();
             $(".channeldisplay").text("00");
+            $("#usertvscreen").css("opacity", "1");
+            $(".usertvscreencontainer").css("opacity", ".1");
         };
     }
     //video clip tv turning off events
@@ -363,6 +434,13 @@ function setVideoEvents(videoName, video) {
         video.onended = function (e) {
             $("#TVTurningOff").hide();
             $(".channeldisplay").text("");
+            $("#usertvscreen").css("opacity", ".1");
+            $(".usertvscreencontainer").css("opacity", "1");
+
+            if (!($("#usertvscreen").is(":visible"))) {
+                $(".oldtvscreen").show();
+                $(".oldtvscreen").css("opacity", "1");
+            }
         };
     }
 
@@ -384,15 +462,15 @@ function openFullscreen(elem) {
 
 function closeFullscreen() {
     if (document.exitFullscreen) {
-      document.exitFullscreen();
+        document.exitFullscreen();
     } else if (document.mozCancelFullScreen) { /* Firefox */
-      document.mozCancelFullScreen();
+        document.mozCancelFullScreen();
     } else if (document.webkitExitFullscreen) { /* Chrome, Safari and Opera */
-      document.webkitExitFullscreen();
+        document.webkitExitFullscreen();
     } else if (document.msExitFullscreen) { /* IE/Edge */
-      document.msExitFullscreen();
+        document.msExitFullscreen();
     }
-  }
+}
 function showStatic() {
     STATIC = true;
     //display static canvas to provide width
@@ -416,4 +494,31 @@ function checkUrl(url) {
     })
     return http.status == 200;
     // this will return 200 on success, and 0 or negative value on error
+}
+
+// Avoid `console` errors in browsers that lack a console.
+// (function() {
+//     var method;
+//     var noop = function () {};
+//     var methods = [
+//         'assert', 'clear', 'count', 'debug', 'dir', 'dirxml', 'error',
+//         'exception', 'group', 'groupCollapsed', 'groupEnd', 'info', 'log',
+//         'markTimeline', 'profile', 'profileEnd', 'table', 'time', 'timeEnd',
+//         'timeStamp', 'trace', 'warn'
+//     ];
+//     var length = methods.length;
+//     var console = (window.console = window.console || {});
+
+//     while (length--) {
+//         method = methods[length];
+
+//         // Only stub undefined methods.
+//         if (!console[method]) {
+//             console[method] = noop;
+//         }
+//     }
+// }());
+
+function logMessage(m) {
+    console.log(m);
 }

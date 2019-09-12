@@ -64,7 +64,7 @@ var img;
 OConceptAnimate.prototype.animateImage = function(){
 
     return new Promise((resolve, reject) => {
-        console.log("IMAGE PRELOAD : " + ImageFilePath);
+        //console.log("IMAGE PRELOAD : " + ImageFilePath);
         res = resolve;
   
         //Initial setup
@@ -73,7 +73,7 @@ OConceptAnimate.prototype.animateImage = function(){
         img.crossOrigin = "Anonymous";
         img.onload = () => {
 
-            console.log("IMAGE ONLOAD : " + ImageFilePath);
+            //console.log("IMAGE ONLOAD : " + ImageFilePath);
 
             //Create canvas's
             var canvasToCopy = document.createElement('canvas');
@@ -126,6 +126,7 @@ OConceptAnimate.prototype.animateImage = function(){
             }
 
             //Stage Colors for animation
+            //StageColorsForAnimation();
 
             //Starts the animation at 60 fps
             currentPointIteration = 0;
@@ -172,7 +173,49 @@ function getPixelIndex(x, y) {
 }
 
 function StageColorsForAnimation(){
+    var tempPointsToKeep = [];
+    for(var i = 0; i < StagedColors.length; i++){
+        var currentStageColors = StagedColors[i];
 
+        //get correct  points based on rules  
+        var currentStagePoints = PointsToAnimate.filter(function(p){
+            var pointData = p.pixelData.data;
+            var red = pointData[0];
+            var green = pointData[1];
+            var blue = pointData[2];
+            return 
+                //(red >= currentStageColors.redLowerLimit && 
+                //red <= currentStageColors.redUpperLimit //&& 
+                //green >= currentStageColors.greenLowerLimit &&
+                //green <= currentStageColors.greenUpperLimit &&
+                blue >= currentStageColors.blueLowerLimit &&
+                blue <= currentStageColors.blueUpperLimit
+                ;
+        });
+
+        tempPointsToKeep = tempPointsToKeep.concat(currentStagePoints);
+
+        //get opposite points and push as remaining points to search
+        PointsToAnimate = PointsToAnimate.filter(function(p){
+            var pointData = p.pixelData.data;
+            var red = pointData[0];
+            var green = pointData[1];
+            var blue = pointData[2];
+            return (
+                //(red < currentStageColors.redLowerLimit || 
+                //red > currentStageColors.redUpperLimit) //|| 
+                //(green < currentStageColors.greenLowerLimit ||
+                //green > currentStageColors.greenUpperLimit)
+                blue < currentStageColors.blueLowerLimit ||
+                blue > currentStageColors.blueUpperLimit
+                );
+        });
+    }
+
+    //Push remaining points to the end
+    tempPointsToKeep = tempPointsToKeep.concat(PointsToAnimate);
+    //reset points with new order
+    PointsToAnimate = tempPointsToKeep;
 }
 
 //Gets all of the pixels from the Full Map - in order

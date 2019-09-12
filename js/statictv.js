@@ -33,7 +33,7 @@ $(window).on("load", function () {
 
 function startStatic() {
 
-    window.onresize = function () {
+    // window.onresize = function () {
 
         if (STATIC) {
             var width = canvas.offsetWidth == 0 ? canvas.width : canvas.offsetWidth;
@@ -47,9 +47,9 @@ function startStatic() {
             for (var i = 0; i < SAMPLE_COUNT; i++)
                 samples.push(generateRandomSample(context, canvas.width, canvas.height));
         }
-    };
+    // };
 
-    window.onresize();
+    // window.onresize();
     window.requestAnimationFrame(render);
 }
 
