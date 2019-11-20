@@ -1,0 +1,151 @@
+<html>
+
+<head>
+    <link rel="icon" href="favicon.ico">
+    <link rel=“preload” href=“https://fonts.googleapis.com/css?family=Special+Elite&display=swap” as=“font”>
+    <link rel=“preload” href=“fonts/FiftiesMovies.ttf” as=“font”>
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+    <link rel="stylesheet" type="text/css" href="css/statictv.css">
+    <script src="js/jquery-3.4.1-min.js"></script>
+    <script src="js/jq-ajax-progress.min.js"></script>
+    <script src="js/statictv.js"></script>
+    <script src="js/oconcept-utility.js"></script>
+    <script src="js/oconcept-colors.js"></script>
+    <script src="js/oconcept-animate.js"></script>
+    <script src="js/oconcept-animate-wallart.js"></script>
+    <script src="js/oconcept-animate-letters.js"></script>
+    <script src="js/oconcept-channel-videos.js"></script>
+    <script src="js/oconcept-main.js"></script>
+</head>
+<body>
+    <div class="main">
+        <div class="loading">Loading 0%</div>
+        <div class="sound">
+            <img class="yes" src="images/recordsound.png">
+            <img class="no" src="images/recordnosound.png">
+        </div>
+        <div class="oldtvcontainer">
+            <div class="channeldisplay"></div>
+        </div>
+        <div class="channelvideocontainer">
+            <div class="usertvscreencontainer">
+                <video id="usertvscreen" autoplay></video>
+            </div>
+            <img class="oldtvscreen" src="images/oldtvscreen.png">
+            <canvas id="statictv" class="tvstaticcontainer"></canvas>
+        </div>
+        <div class="tvremotecontainer">
+            <img class="oldtvremote" src="images/oldtvremoteskewed2.png">
+            <div id="buttononoff" class="remotebutton"></div>
+            <div id="buttonchannelup" class="remotebutton"></div>
+            <div id="buttonchanneldown" class="remotebutton"></div>
+            <div id="buttonfullscreen" class="remotebutton"></div>
+            <div id="buttonmoreinfo" class="remotebutton"></div>
+            <div id="buttoninvert" class="remotebutton"></div>
+            <div id="buttonnumberone" class="remotebutton"></div>
+            <div id="buttonnumbertwo" class="remotebutton"></div>
+            <div id="buttonnumberthree" class="remotebutton"></div>
+            <div id="buttonnumberfour" class="remotebutton"></div>
+            <div id="buttonnumberfive" class="remotebutton"></div>
+            <div id="buttonnumbersix" class="remotebutton"></div>
+            <div id="buttonnumberseven" class="remotebutton"></div>
+            <div id="buttonnumbereight" class="remotebutton"></div>
+            <div id="buttonnumbernine" class="remotebutton"></div>
+        </div>
+        <div class="wallart">
+            <img class="wallartframe" src="images/wallart/frame.png">
+            <img class="wallartplaceholder" src="images/wallart/0020_20_doggun.png">
+        </div>
+        <div class="moreinfocontainer">
+            <iframe class="moreinfo"></iframe>
+        </div>
+        <div class="floorcontainer">
+            <div class="hardwoodcontainer">
+                <img class="hardwood" src="images/hardwood1.png">
+            </div>
+            <img class="rug" src="images/roundrug1.png">
+            <div class="dog">
+                <div class="barleycontainer">
+                    <img class="barley barleysmile" src="images/barley/barley_smile.png">
+                    <img class="barley barleymiddle" src="images/barley/barley_tongue_middle.png">
+                    <img class="barley barleytop" src="images/barley/barley_tongue_top.png">
+                </div>
+
+                <img class="barley barleyskeleton" src="images/barley/barley_skeleton.png">
+            </div>
+        </div>
+    </div>
+    <div class="castcontainer">
+        <div class="castHeader">CAST</div>
+        <div class="cast">
+            <div class="creditheader">Designed and developed by</div>
+            <div class="credit">S. Ryan O'Connor</div>
+
+            <div class="creditheader">Visit the Source Code</div>
+            <div class="credit"><a href="">GitHub</a></div>
+
+            <div class="creditheader">Contact at</div>
+            <div class="credit"> <a href="https://seanryanoc.com"></a>seanryanoc.com</div>
+
+            <div class="table">
+                <div class="tableheader">Photos</div>
+                <div class="column columnone">
+                    <div>Old TV</div>
+                    <div>Hardwood Floor</div>
+                    <div>Remote</div>
+                    <div>Barley(dog)</div>
+                    <div>Rug</div>
+                    <div>Cursor Hand</div>
+                    <div>Dissolving Wall Art</div>
+                </div>
+                <div class="column columntwo">
+                    <div><a href="https://unsplash.com/@sveninho">Sven Scheuermeier</a></div>
+                    <div><a href="https://www.pexels.com/@nick-demou-365778">Nick Demou</a></div>
+                    <div><a href="https://imgur.com/gallery/cW1b4kA">YoOmarCominYo</a></div>
+                    <div>Herself</div>
+                    <div>S. Ryan O'Connor</div>
+                    <div>S. Ryan O'Connor</div>
+                    <div>Public Domain</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="userMediaMessage">
+        <div class="userMediaMessageHeader">
+            Camera Access?
+        </div>
+        <div>
+            checking access
+        </div>
+            <div class="accesswaiting">
+                <div>
+                    .
+                </div>
+                <div>
+                    .
+                </div>
+                <div>
+                    .
+                </div>
+                <div>
+                    .
+                </div>
+                <div>
+                    .
+                </div>
+                <div>
+                    .
+                </div>
+            </div>
+            <div class="accessstatus"></div>
+            <div class="accessstatusyes"></div>
+            <div class="accessstatusno"></div>
+        <div>
+            Camera access is used for the interactive experience only.
+            We DO NOT stream/save your video anywhere at all.
+            Feel free to deny if you are not comfortable.
+        </div>
+    </div>
+</body>
+
+</html>
