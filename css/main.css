@@ -1,16 +1,40 @@
+@import url('https://fonts.googleapis.com/css?family=Special+Elite&display=swap');
+@import url("/fonts/FiftiesMovies.ttf");
+
 html, body {
-    min-height: 1230px;
-    overflow-y: scroll;
-    background-image: url(../images/bicycle.png);
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-size: cover;
     cursor:url(../images/ochand.png) 1 17, auto;
+    margin:0;
+    padding: 0;
+    background-color: black;
 }
 
+.loading{
+    font-size: 42;
+    font-family: 'Special Elite', sans-serif;
+    margin-top: 100;
+    margin-left: 300;
+    color: #0a0a0a;
+    position:absolute;
+    display:none;
+}
 
 .main{
-  
+    min-height: 1240px;
+    overflow-y: scroll;
+    background-image: url(../images/bricks.jpg);
+    background-position: -110px;
+    background-repeat: no-repeat;
+    background-size: cover;
+    margin:0;
+    padding:0;
+    z-index:1;
+}
+
+.maintvstaticcontainer{
+    height: 100%;
+    width: 100%;
+    position: relative;
+    z-index:1000000;
 }
 
 .oldtv{
@@ -18,6 +42,7 @@ html, body {
     margin-left: 87px;
     width: 852px;
     height: auto;
+    position: absolute;
 }
 
 .channeldisplay{
@@ -34,7 +59,10 @@ html, body {
     height: 50;
     color: #bd3636;
     display:none;
+    z-index:1;
 }
+
+
 
 .oldtvscreen{
     height: inherit;
@@ -101,8 +129,8 @@ html, body {
     z-index: 10;
     height: 460px;
     width: 575px;
-    margin-left: 170px;
-    margin-top: 105px;
+    margin-left: 180px;
+    margin-top: 110px;
     display: none;
     position:absolute;
     overflow: hidden;
@@ -115,9 +143,9 @@ html, body {
 }
 
 .remotebutton{
-    width: 16px;
-    height: 16px;
-    background: red;
+    width: 18px;
+    height: 18px;
+    /* background: red; */
     display: inline-block;
     position: absolute;
     z-index: 1000000;
@@ -148,12 +176,62 @@ html, body {
     top: 195;
 }
 
+#buttonnumberone{
+    top: 47;
+    left: 40;
+}
+
+#buttonnumbertwo{
+    top: 40;
+    left: 65;
+}
+
+#buttonnumberthree{
+    top: 33;
+    left: 90;
+}
+
+#buttonnumberfour{
+    top: 69;
+    left: 47;
+}
+
+#buttonnumberfive{
+    top: 62;
+    left: 74;
+}
+
+#buttonnumbersix{
+    top: 54;
+    left: 100;
+}
+
+#buttonnumberseven{
+    top: 91;
+    left: 57;
+}
+
+#buttonnumbereight{
+    top: 86;
+    left: 87;
+}
+
+#buttonnumbernine{
+    top: 79;
+    left: 114;
+}
+
+#buttoninvert{
+    top: 183;
+    left: 134;
+}
+
 .tvremotecontainer{
     display: inline-block;
     position: absolute;
     right: 350;
     top:500;
-    z-index: 100000;
+    z-index: 1000000000;
     transform: rotate(-5deg);
     display:none;
 }
@@ -181,6 +259,200 @@ html, body {
     top: 60px;
     right: 20px;
     display:none;
+    z-index:10000000;
+}
+
+.wallart{
+    position: absolute;
+    top: 90px;
+    left: 1050px;
+    width: 270px;
+    height: 360px;
+}
+
+.wallartframe{
+    z-index: 10;
+}
+
+.wallartplaceholder{
+    z-index: 1;
+}
+.wallartcanvas{
+    z-index: 1;
+    width:inherit;
+    height: inherit;
+    position: absolute;
+}
+
+.wallart > img{
+    width:inherit;
+    height: inherit;
+    position: absolute;
+}
+
+.floorcontainer{
+    position: absolute;
+    top: 1040;
+    left: -500;
+    overflow: visible;
+}
+
+.hardwoodcontainer{
+    overflow:hidden;
+    width: 100%;
+}
+
+.hardwood{
+    max-width:130%;
+    z-index:1;
+}
+
+
+ .rug{
+    position: absolute;
+    top: 60;
+    left: 1200;
+    z-index: 10;
+ }
+
+.dog{
+    position: absolute;
+    top: -70;
+    left: 1300;
+    z-index: 10;
+
+}
+
+ .barley{
+     display:none;
+     width:500px;
+ }
+
+ .castcontainer{
+    padding: 10%;
+    margin: 10%;
+    position: absolute;
+    /* bottom: -100%; */
+    text-align: center;
+    width: 80%;
+    animation: 20s credits linear infinite;
+    filter: invert(1) !important;
+
+    background-color: white;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    z-index: 10000000;
+    display: none; 
+    opacity: .8;
+
+    /* display:none; */
+}
+
+.castHeader{
+    font-size: 64;
+    font-family: 'Fifties Movies', sans-serif;
+}
+
+.cast{
+    font-size: 36;
+    font-family: 'Fifties Movies', sans-serif;
+}
+
+@keyframes credits {
+    0% {
+      top: 100%;
+    }
+    100% {
+      top: -100%;
+    }
+  }
+
+.creditheader{
+    margin-top: 30px;
+    font-size:48;
+}
+
+.credit{
+    margin-top: 10px;
+}
+
+ .table{
+    text-align: inherit;
+    width: 80%;
+    margin-top: 50px;
+    display:inline;
+ }
+
+ .tableheader{
+    text-align: inherit;
+    font-size:48;
+    margin-top:100px;
+    margin-bottom:10px;
+ }
+
+ .column{
+     width:48%;
+     padding:5px;
+ }
+
+ .column > div{
+     margin-bottom:10px;
+ }
+
+ .columnone{
+    text-align:left;
+    float:left;
+ }
+
+ .columntwo{
+     float:right;
+     text-align:right;
+}
+
+.userMediaMessage{
+    z-index: 1000000000000;
+    background-color: black;
+    opacity : .8;
+    font-family: 'Fifties Movies', sans-serif;
+    font-size : 24;
+    text-align:center;
+    vertical-align: middle;
+    padding:10%;
+    width:100%;
+    height:100%;
+    position: fixed;
+    top:0;
+    color:white;
+    display:none;
+    line-height: 1.5;
+
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+.accesswaiting > div{
+    float:left;
+    margin-left: 20px;
+    font-size:42;
+}
+
+.accesswaiting{
+    display: inline-block;
+    margin-bottom: 30px;
+    margin-left: -20px;
+}
+
+.accessstatus{
+    margin-top:10px;
+    margin-bottom:30px;
+}
+
+.userMediaMessageHeader{
+    font-size : 36;
+    padding-bottom: 20px;
+
 }
 
 .sound{

@@ -4,20 +4,7 @@
 var STATIC = true;
 
 var canvas = null,
-context = null,
-scaleFactor = 2.5, // Noise size
-samples = [],
-sampleIndex = 0,
-scanOffsetY = 0,
-scanSize = 0,
-FPS = 50,
-scanSpeed = FPS * 15, // 15 seconds from top to bottom
-SAMPLE_COUNT = 10;
-
-$(window).on("load", function () {
-
-    canvas = document.querySelector("#statictv"),
-    context = canvas.getContext("gl") || canvas.getContext("2d"),
+    context = null,
     scaleFactor = 2.5, // Noise size
     samples = [],
     sampleIndex = 0,
@@ -27,26 +14,52 @@ $(window).on("load", function () {
     scanSpeed = FPS * 15, // 15 seconds from top to bottom
     SAMPLE_COUNT = 10;
 
+$(window).on("load", function () {
+
+
+
 });
 
 
 
-function startStatic() {
+function startStatic(isFullScreen) {
+
+    canvas = document.querySelector("#statictv"),
+        context = canvas.getContext("gl") || canvas.getContext("2d"),
+        scaleFactor = 2.5, // Noise size
+        samples = [],
+        sampleIndex = 0,
+        scanOffsetY = 0,
+        scanSize = 0,
+        FPS = 50,
+        scanSpeed = FPS * 15, // 15 seconds from top to bottom
+        SAMPLE_COUNT = 10;
 
     // window.onresize = function () {
 
-        if (STATIC) {
-            var width = canvas.offsetWidth == 0 ? canvas.width : canvas.offsetWidth;
-            var height = canvas.offsetHeight == 0 ? canvas.height : canvas.offsetHeight;
+    if (STATIC) {
+        var width;
+        var height;
 
+        if (isFullScreen) {
+            width = window.outerWidth;
+            height = window.outerHeight;
+            canvas.style.width = window.outerWidth + "px";
+            canvas.style.height = window.outerHeight + "px";
+        }
+        else {
+            width = canvas.offsetWidth == 0 ? canvas.width : canvas.offsetWidth;
+            height = canvas.offsetHeight == 0 ? canvas.height : canvas.offsetHeight;
             canvas.width = width / scaleFactor;
             canvas.height = canvas.width / (width / height);
-            scanSize = (height / scaleFactor) / 3;
-
-            samples = []
-            for (var i = 0; i < SAMPLE_COUNT; i++)
-                samples.push(generateRandomSample(context, canvas.width, canvas.height));
         }
+
+        scanSize = (height / scaleFactor) / 3;
+
+        samples = []
+        for (var i = 0; i < SAMPLE_COUNT; i++)
+            samples.push(generateRandomSample(context, canvas.width, canvas.height));
+    }
     // };
 
     // window.onresize();

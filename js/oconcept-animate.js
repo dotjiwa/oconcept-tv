@@ -1,12 +1,13 @@
 "use strict";
 
 //Public class 
-var OConceptAnimate = (function(){
+class OConceptAnimate {
 
- function OConceptAnimate(
+ constructor(
     imageUniqueName = null,
     classNames = null,
     imageFilePath = null,
+    finalImageFilePath = null,
     containerClass = null,
     pointsToAnimate = null, 
     pixelsPerFrameProcessingRate = 100,
@@ -14,165 +15,165 @@ var OConceptAnimate = (function(){
     startDirection = null, 
     stagedColors = [],
     startingPoint = null
-) {
-
-        ImageUniqueName = imageUniqueName;
-        ClassNames = classNames;
-        ImageFilePath = imageFilePath;
-        ContainerClass = containerClass;
-        PointsToAnimate = pointsToAnimate;
-        ScanDirection = scanDirection != null ? scanDirection.toLowerCase() : scanDirection;
-        StartDirection = startDirection != null ? startDirection.toLowerCase() : startDirection;
-        StartingPoint = startingPoint;
-        PixelsPerFrameProcessingRate = pixelsPerFrameProcessingRate;
-        StagedColors = stagedColors;
+ ){
+        this.ImageUniqueName = imageUniqueName;
+        this.ClassNames = classNames;
+        this.ImageFilePath = imageFilePath;
+        this.FinalImageFilePath = finalImageFilePath;
+        this.ContainerClass = containerClass;
+        this.PointsToAnimate = pointsToAnimate;
+        this.ScanDirection = scanDirection != null ? scanDirection.toLowerCase() : scanDirection;
+        this.StartDirection = startDirection != null ? startDirection.toLowerCase() : startDirection;
+        this.StartingPoint = startingPoint;
+        this.PixelsPerFrameProcessingRate = pixelsPerFrameProcessingRate;
+        this.StagedColors = stagedColors;
 }
 
 
+// //Class Names to add to canvas
+// var ClassNames;
+// //Unique Image Name
+// var ImageUniqueName;
+// //Relative Path to the image file of the image to animate
+// var ImageFilePath;
+// //Relative Path to the final image file that will replace the animated image
+// var FinalImageFilePath;
+// //Append to element with this class;
+// var ContainerClass;
+// //If the image has been preprocessed, the pre-determined points can be passed in
+// var PointsToAnimate;
+// //Determines the direction the image will be animated
+// var ScanDirection;
+// //Used to automatically find the starting point for animation
+// var StartDirection;
+// //On images where the starting point is difficult to automatically determine, use this explicit starting point
+// var StartingPoint;
+// //Controls the speed of animation - the number of pixels written per frame (framerate is 60 fps) - default is 100
+// var PixelsPerFrameProcessingRate;
+// //Colors to animate in order
+// var StagedColors;
 
-//Class Names to add to canvas
-var ClassNames;
-//Unique Image Name
-var ImageUniqueName;
-//Relative Path to the image file
-var ImageFilePath;
-//Append to element with this class;
-var ContainerClass;
-//If the image has been preprocessed, the pre-determined points can be passed in
-var PointsToAnimate;
-//Determines the direction the image will be animated
-var ScanDirection;
-//Used to automatically find the starting point for animation
-var StartDirection;
-//On images where the starting point is difficult to automatically determine, use this explicit starting point
-var StartingPoint;
-//Controls the speed of animation - the number of pixels written per frame (framerate is 60 fps) - default is 100
-var PixelsPerFrameProcessingRate;
-//Colors to animate in order
-var StagedColors;
-
-var xboundary;
-var yboundary;
-var currentPointIteration;
-var canvasToDrawOnContext;
-var canvasToCopyContext;
-var ImageData;
+// var xboundary;
+// var yboundary;
+// var currentPointIteration;
+// var canvasToDrawOnContext;
+// var canvasToCopyContext;
+//var ImageData;
 
 //Main routine that starts the process
-var res;
-var img;
-OConceptAnimate.prototype.animateImage = function(){
+//var res;
+//var img;
+animateImage = function(){
+
+
 
     return new Promise((resolve, reject) => {
-        //console.log("IMAGE PRELOAD : " + ImageFilePath);
-        res = resolve;
+
+        this.res = resolve;
   
         //Initial setup
         //Create the image
-        img = imgCreate(ImageFilePath);
-        img.crossOrigin = "Anonymous";
-        img.onload = () => {
+        this.img = this.imgCreate(this.ImageFilePath);
+        this.img.crossOrigin = "Anonymous";
+        this.img.onload = () => {
 
-            //console.log("IMAGE ONLOAD : " + ImageFilePath);
 
             //Create canvas's
             var canvasToCopy = document.createElement('canvas');
             var canvasToDrawOn = document.createElement('canvas');
 
             //Set classes for easy access
-            for(var i = 0; i < ClassNames.length; i++){
-                $(canvasToDrawOn).addClass(ClassNames[i]);
+            for(var i = 0; i < this.ClassNames.length; i++){
+                $(canvasToDrawOn).addClass(this.ClassNames[i]);
             }
             //give unique class as well
-            $(canvasToDrawOn).addClass(ImageUniqueName);
+            $(canvasToDrawOn).addClass(this.ImageUniqueName);
 
             //Set widths to imported image width
-            canvasToCopy.width  = canvasToDrawOn.width = xboundary = img.width;
-            canvasToCopy.height = canvasToDrawOn.height = yboundary = img.height;
+            canvasToCopy.width  = canvasToDrawOn.width = this.xboundary = this.img.width;
+            canvasToCopy.height = canvasToDrawOn.height = this.yboundary = this.img.height;
 
             //Get contexts
-            canvasToCopyContext = canvasToCopy.getContext('2d');
-            canvasToDrawOnContext = canvasToDrawOn.getContext('2d');
+            this.canvasToCopyContext = canvasToCopy.getContext('2d');
+            this.canvasToDrawOnContext = canvasToDrawOn.getContext('2d');
 
             //draw image for copy
-            canvasToCopyContext.drawImage(img, 0, 0, img.width, img.height);
+            this.canvasToCopyContext.drawImage(this.img, 0, 0, this.img.width, this.img.height);
 
-            //append canvas to the screen
-            $("." + ContainerClass).append(canvasToDrawOn);
-            //$("." + ContainerClass).append(canvasToCopy);
+            //update canvas to the screen
+            $("." + this.ContainerClass).append(canvasToDrawOn);
             canvasToCopy = null;
             canvasToDrawOn = null;
-
-            //If pre-processed animation points aren't passed in
-            if(PointsToAnimate == null){
-         
-                // The following methods are for pre-processing of points for speed
-                // The point loading takes time, so we don't want to do it every page load
-                // We use this code to download the image data to file, which can be quickly loaded for animation
-                
-                //trim canvas of all white/transparent space
-                //var trimmedCopyCanvas = trimCanvas(canvasToCopy);
-                //canvasToCopyContext = trimmedCopyCanvas.getContext('2d');
-
-                //download a copy
-                //download(null, trimmedCopyCanvas.toDataURL(), ImageName + ".png", null);
-
-                var imagePointMap = loadFullImagePoints(canvasToCopyContext, xboundary, yboundary);
-
-                if(StartingPoint == null)
-                    StartingPoint = findStartingPoint(imagePointMap);
-
-                loadPointsToDraw(canvasToCopyContext, imagePointMap);
-            }
 
             //Stage Colors for animation
             //StageColorsForAnimation();
 
             //Starts the animation at 60 fps
-            currentPointIteration = 0;
-            ImageData = canvasToDrawOnContext.createImageData(xboundary, yboundary);
-            window.requestAnimationFrame(runAnimation);
+            this.currentPointIteration = 0;
+            this.ImageData = this.canvasToDrawOnContext.createImageData(this.xboundary, this.yboundary);
+            
+            window.requestAnimationFrame(() => {
+                this.runAnimation();
+            });
 
         }
     });
 }
 
+handleFileReplacement = function(animateVariables){
+    if(this.FinalImageFilePath != null){
+        //Switch out image to tv without screen
+        var noscreenImage = new Image(animateVariables.image.width, animateVariables.image.height)
+        noscreenImage.onload = () => {
+            //After animate prepare canvas to switch out image
+            animateVariables.context.clearRect(0, 0, animateVariables.image.width, animateVariables.image.height);
+            animateVariables.context.drawImage(noscreenImage, 0, 0, noscreenImage.width, noscreenImage.height);
+        }
+        noscreenImage.src = this.FinalImageFilePath;
+    }
+}
 
 //Animates the image
-function runAnimation(){
+runAnimation = function(){
     //proceed if the current iteration is within the number of points to animate
-    if(currentPointIteration < PointsToAnimate.length){  
+    if(this.currentPointIteration < this.PointsToAnimate.length){  
         // create 32 bit array using image data as buffer
-        var data32 = new Uint32Array(ImageData.data.buffer);
+        var data32 = new Uint32Array(this.ImageData.data.buffer);
 
         //this iteration controls the number of pixels written per frame (framerate is 60 fps)
-        for (var p = 0; p < PixelsPerFrameProcessingRate; p++){
-            var currentPoint = PointsToAnimate[currentPointIteration];
+        for (var p = 0; p < this.PixelsPerFrameProcessingRate; p++){
+            var currentPoint = this.PointsToAnimate[this.currentPointIteration];
 
             if(currentPoint == null){
-                return res({context: canvasToDrawOnContext, image:img});
+                this.canvasToDrawOnContext.putImageData(this.ImageData, 0, 0);
+
+                var importantVariables = {context: this.canvasToDrawOnContext, image :this.img};
+                this.handleFileReplacement(importantVariables);
+                return this.res(importantVariables);
             }
 
             var pointData = currentPoint.pixelData.data;
-            data32[currentPoint.y * xboundary + currentPoint.x] =
+            data32[currentPoint.y * this.xboundary + currentPoint.x] =
                 (pointData[3]  << 24) |	// alpha
                 (pointData[2]  << 16) |	// blue
                 (pointData[1]  <<  8) |	// green
                  pointData[0]; 		// red
 
-            currentPointIteration++;
+                 this.currentPointIteration++;
         }
-        canvasToDrawOnContext.putImageData(ImageData, 0, 0);
+        this.canvasToDrawOnContext.putImageData(this.ImageData, 0, 0);
 
-        window.requestAnimationFrame(runAnimation);
+        window.requestAnimationFrame(() => {
+            this.runAnimation();
+        });
     }
 }
 
-function getPixelIndex(x, y) {
+getPixelIndex = function(x, y) {
     return (y * width + x) * 4; // width used when getting buffer
 }
 
-function StageColorsForAnimation(){
+StageColorsForAnimation = function(){
     var tempPointsToKeep = [];
     for(var i = 0; i < StagedColors.length; i++){
         var currentStageColors = StagedColors[i];
@@ -220,7 +221,7 @@ function StageColorsForAnimation(){
 
 //Gets all of the pixels from the Full Map - in order
 //so that the image gets drawn from the correct starting point
-function loadPointsToDraw(canvasToCopyContext, imagePointMap){  
+loadPointsToDraw = function(canvasToCopyContext, imagePointMap){  
 
     PointsToAnimate = [];
 
@@ -267,7 +268,7 @@ function loadPointsToDraw(canvasToCopyContext, imagePointMap){
 
 //Search the nine pixels around an pixel for color
 //Creates the right to left, then left to right scan motion
-function scanAroundPixel(ctx, startPoint, map){
+scanAroundPixel = function(ctx, startPoint, map){
     var x;
     var y;
 
@@ -347,7 +348,7 @@ function scanAroundPixel(ctx, startPoint, map){
 }
 
 //returns the point if it has color
-function AddPointIfHasColor(ctx, x, y, map){
+AddPointIfHasColor = function(ctx, x, y, map){
     if(x < xboundary && x > 0 && y < yboundary && y > 0){
         var point =  getImagePointFromMap(x,y, map);
         var pointData = point.pixelData.data;
@@ -358,7 +359,7 @@ function AddPointIfHasColor(ctx, x, y, map){
     }
 }
 
-function findStartingPoint(imagePointMap){
+findStartingPoint =function(imagePointMap){
     var x;
     var y;
     switch(StartDirection){
@@ -427,7 +428,7 @@ function findStartingPoint(imagePointMap){
 }
 
 //Gets Full Map of Image Pixels
-function loadFullImagePoints(ctx, width, height){
+loadFullImagePoints = function(ctx, width, height){
     var imagePointMap = [];
     for (var x = 0; x < width; x++){
         for (var y = 0; y < height; y++){
@@ -439,7 +440,7 @@ function loadFullImagePoints(ctx, width, height){
 }
 
 //Retrieves pixel from map based on X,Y Coordinates
-function getImagePointFromMap(x,y, map){
+getImagePointFromMap = function(x,y, map){
     for(var i = 0; i < map.length; i++){
         if(map[i].x == x && map[i].y == y)
             return map[i];
@@ -447,7 +448,7 @@ function getImagePointFromMap(x,y, map){
 }
 
 //Checks the Points To Animate array if point exists
-function checkIfContainsPoint(point){
+checkIfContainsPoint = function(point){
     var found = false;
     for(var i = 0; i < PointsToAnimate.length; i++) {
         if (PointsToAnimate[i].x == point.x && PointsToAnimate[i].y == point.y) {
@@ -461,7 +462,7 @@ function checkIfContainsPoint(point){
 
 
 //download utility
-function download(content, dataUrl, name, type) {
+download = function(content, dataUrl, name, type) {
     const a = document.body.appendChild(document.createElement('a'));
     if(content != null){
         const file = new Blob([content], {
@@ -490,7 +491,7 @@ function download(content, dataUrl, name, type) {
 
 //take untyped file data and converts it to be correctly typed for use by canvas
 //then adds data to the points to scan
-OConceptAnimate.prototype.convertFileDataToUsableImagePoints = function(data){
+convertFileDataToUsableImagePoints = function(data){
     return new Promise((resolve, reject) => {
         var points = [];
         for(var i = 0; i < data.length; i++){
@@ -508,14 +509,14 @@ OConceptAnimate.prototype.convertFileDataToUsableImagePoints = function(data){
     });
 }
 
-function resizeCanvas(widthPercent, heightPercent) {
+resizeCanvas = function(widthPercent, heightPercent) {
     var myCanvas = document.getElementsByClassName(ImageUniqueName)[0];
         myCanvas.width = myCanvas.width * widthPercent;
         myCanvas.height = myCanvas.height * heightPercent;
   }
 
 //trims transparent space from canvas
-function trimCanvas(c) {
+trimCanvas = function(c) {
     var ctx = c.getContext('2d'),
         copy = document.createElement('canvas').getContext('2d'),
         pixels = ctx.getImageData(0, 0, c.width, c.height),
@@ -576,6 +577,17 @@ function trimCanvas(c) {
 // http://paulirish.com/2011/requestanimationframe-for-smart-animating/
 // http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
  
+
+    imgCreate = function(src, alt, title) {
+        var img = new Image(); //document.createElement('img');
+        img.src = src;
+        if ( alt != null ) img.alt = alt;
+        if ( title != null ) img.title = title;
+        return img;
+    }
+
+}
+
 // requestAnimationFrame polyfill by Erik Möller
 // fixes from Paul Irish and Tino Zijdel
 (function() {
@@ -602,14 +614,3 @@ function trimCanvas(c) {
             clearTimeout(id);
         };
 }());
-
-function imgCreate(src, alt, title) {
-    var img = new Image(); //document.createElement('img');
-    img.src = src;
-    if ( alt != null ) img.alt = alt;
-    if ( title != null ) img.title = title;
-    return img;
-}
-
-return OConceptAnimate;
-})();
