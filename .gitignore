@@ -3,3 +3,4 @@ Thumbs.db
 /node_modules/*
 /video/_originals/*
 /video/_cmp/*
+/aws
