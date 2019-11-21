@@ -75,15 +75,16 @@ async function animateOldTv() {
 
         if(TVDATA.length == 0){
 
-            var totalCompletedBytes = 0;
+            var totalCompletedBytes = [];
             var totalBytes = [];
 
             function getSum(arr){
                 var total = 0;
-                for(var i = 0; i < arr.length; i++){
 
-                    total += arr[i];
-                }
+                $.each(arr, function() {
+                    total += this.value;
+                });
+
                 return total;
             }
 
@@ -105,12 +106,20 @@ async function animateOldTv() {
                                 if (e.lengthComputable) {
                                     //if first returned item FOR THIS PROMISE, insert
                                     if(!totalBytes[i])
-                                        totalBytes.push(e.total);
+                                        totalBytes.push({id: i, value: e.total});
 
-                                    totalCompletedBytes += e.loaded;
+                                    if(!totalCompletedBytes[i])
+                                        totalCompletedBytes.push({id: i, value: e.loaded});
+                                    else
+                                        $.each(totalCompletedBytes, function() {
+                                            if (this.id === i) {
+                                                this.value = e.loaded;
+                                            }
+                                        });;
 
-                                    var completedPercentage = Math.round(totalCompletedBytes / getSum(totalBytes));
-                                    $(".loading").text("Loading " + completedPercentage + "%");
+                                    var completedPercentage = Math.round((getSum(totalCompletedBytes) * 100) / getSum(totalBytes));
+                                    if (completedPercentage <= 100)
+                                        $(".loading").text("Loading " + completedPercentage + "%");
                                 }
                             }
                         },
@@ -303,43 +312,66 @@ async function getUserVideo() {
 
         await activateUserVideoMessage();
 
-        // Get access to the camera!
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        //Some browsers partially implement mediaDevices. We can't just assign an object
+        // with getUserMedia as it would overwrite existing properties.
+        // Here, we will just add the getUserMedia property if it's missing.
+        if (navigator.mediaDevices.getUserMedia === undefined) {
+        navigator.mediaDevices.getUserMedia = function(constraints) {
 
-            // Not adding `{ audio: true }` since we only want video now
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(async function (stream) {
+            // First get ahold of the legacy getUserMedia, if present
+            var getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
-                    //handle user media message success
-                    $(".accessstatus").text("Allowed!");
-
-                    await timeout(3000);
-
-                    $(".userMediaMessage").fadeOut(500);
-                    PAUSECAMERAACCESSWAITING = true;
-               
-                    //show video
-                    video.srcObject = stream;
-                    video.play();
-                    $(".usertvscreencontainer").show();
-
-                    //hide placeholder
-                    $(".oldtvscreen").hide();
-
-                    resolve();                   
-                })
-                .catch(async (err) => {
-                    logMessage("Access user camera : " + err.message);
-                    //handle user media message blocked
-    
-                    $(".accessstatus").text("Blocked by user");
-                    await timeout(3000);
-                    PAUSECAMERAACCESSWAITING = true;
-                    $(".userMediaMessage").fadeOut(500);
-                    resolve();
-
-                });
+            // Some browsers just don't implement it - return a rejected promise with an error
+            // to keep a consistent interface
+            if (!getUserMedia) {
+            return Promise.reject(new Error('getUserMedia is not implemented in this browser'));
             }
+
+            // Otherwise, wrap the call to the old navigator.getUserMedia with a Promise
+            return new Promise(function(resolve, reject) {
+            getUserMedia.call(navigator, constraints, resolve, reject);
+            });
+        }
+        }
+
+        navigator.mediaDevices.getUserMedia({ audio: true, video: true })
+        .then(function(stream) {
+
+            //handle user media message success
+            $(".accessstatus").text("Allowed!");
+            //fade out message
+            await timeout(3000);
+            $(".userMediaMessage").fadeOut(500);
+            PAUSECAMERAACCESSWAITING = true;
+
+            // Older browsers may not have srcObject
+            if ("srcObject" in video) {
+                video.srcObject = stream;
+            } 
+            else {
+                // Avoid using this in new browsers, as it is going away.
+                video.src = window.URL.createObjectURL(stream);
+
+            }
+            video.play();
+            $(".usertvscreencontainer").show();
+
+            //hide placeholder
+            $(".oldtvscreen").hide();
+
+            resolve();                   
+        }).catch(async (err) => {
+
+            logMessage("Access user camera : " + err.message);
+            
+            //handle user media message blocked
+            $(".accessstatus").text("Blocked by user");
+            await timeout(3000);
+            PAUSECAMERAACCESSWAITING = true;
+            $(".userMediaMessage").fadeOut(500);
+            resolve();
+
+        });
     });
 }
 

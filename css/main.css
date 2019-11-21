@@ -20,6 +20,7 @@ html, body {
 
 .main{
     min-height: 1240px;
+    height:100%;
     overflow-y: scroll;
     background-image: url(../images/bricks.jpg);
     background-position: -110px;
@@ -546,3 +547,37 @@ html, body {
     height:70px;
 }
 
+@media (max-width: 479px) {
+    .oldtv{
+        margin-top:20px;
+        margin-left:20px;
+    }
+    .channeldisplay{
+        top: 140;
+        left: 743
+    }
+    .channelvideocontainer{
+        margin-left:110px;
+        margin-top:96px;
+    }
+    .floorcontainer{
+        bottom: 155;
+        left:-580
+    }
+    .hardwood{
+        max-width:190%;
+    }
+    .rug{
+        top:70;
+        left:760;
+    }
+    .dog{
+        left:850;
+    }
+    .wallart{
+        top:600;
+        left:500;
+        width:350px;
+        height:420px;
+    }
+}
