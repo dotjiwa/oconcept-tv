@@ -39,6 +39,7 @@ async function animateWallArt() {
     }
 
     //Animate images
+    var previousImageFileName = "";
     for (var i = 0; i < wallArtImages.length; i++) {
 
         var wallArtImage = wallArtImages[i];
@@ -58,6 +59,12 @@ async function animateWallArt() {
         await art.animateImage().catch((err) => console.log(err));
 
         await timeout(3000);
+
+        //remove canvas element of previous iteration
+        if(previousImageFileName != "")
+            $("." + previousImageFileName).remove();
+        //save canvas name for removal
+        previousImageFileName = wallArtImage.filename;
 
         //make continuous loop
         if (i == 19)
@@ -92,7 +99,7 @@ async function animateOldTv() {
             var sourceFolder = "datafiles/oldtv/";
             var filePrefix = "oldtv-partial-";  
             var promises = [];
-            for(var i= 0; i < 9;i++){
+            for(var i= 0; i < 10;i++){
                 var url = sourceFolder + filePrefix + i.toString() + ".json";
                 
                 var firstCall = true;
@@ -141,6 +148,8 @@ async function animateOldTv() {
                 $(".loading").hide();
             });;
 
+            //TVDATA = shuffle(TVDATA);
+
             //Make request to fill tv reflection with user video
             await getUserVideo();
 
@@ -163,11 +172,11 @@ async function paintTV(){
         var tv = new OConceptAnimate(
             "oldtv",
             ["oldtv" + numberOfPaintedElements],
-            "images/oldtvfull1.png",
-            "images/oldtvnoscreen1.png",
+            "images/oldtvfull1_medium.png",
+            "images/oldtvnoscreen1_medium.png",
             "oldtvcontainer",
             TVDATA,
-            20000,
+            8000,
             "all",
             "righttolefttop",
             stagedColors);
@@ -335,7 +344,7 @@ async function getUserVideo() {
         }
 
         navigator.mediaDevices.getUserMedia({ audio: true, video: true })
-        .then(function(stream) {
+        .then(async function(stream) {
 
             //handle user media message success
             $(".accessstatus").text("Allowed!");
@@ -363,7 +372,7 @@ async function getUserVideo() {
         }).catch(async (err) => {
 
             logMessage("Access user camera : " + err.message);
-            
+
             //handle user media message blocked
             $(".accessstatus").text("Blocked by user");
             await timeout(3000);

@@ -22,8 +22,8 @@ html, body {
     min-height: 1240px;
     height:100%;
     overflow-y: scroll;
-    background-image: url(../images/bricks.jpg);
-    background-position: -110px;
+    background-image: url(../images/bricks.png);
+    /* background-position: -110px; */
     background-repeat: no-repeat;
     background-size: cover;
     margin:0;
@@ -31,16 +31,17 @@ html, body {
     z-index:1;
 }
 
-.maintvstaticcontainer{
-    height: 100%;
-    width: 100%;
+
+.oldtvcontainer{
     position: relative;
-    z-index:1000000;
+    top: 0;
+    left: 0;
+    z-index:1000;
 }
 
 .oldtv{
-    margin-top: 38px;
-    margin-left: 87px;
+    margin-top: 40px;
+    margin-left: 30px;
     width: 852px;
     height: auto;
     position: absolute;
@@ -49,7 +50,7 @@ html, body {
 .channeldisplay{
     position: absolute;
     top: 180;
-    left: 810;
+    left: 755;
     text-align: center;
     background: #444242;
     border-radius: 4px;
@@ -99,6 +100,10 @@ html, body {
    filter: gray;
 }
 
+.tvstaticcontainer{
+
+}
+
 .channelvideo{
     width: inherit;
     height: inherit;
@@ -130,8 +135,8 @@ html, body {
     z-index: 10;
     height: 460px;
     width: 575px;
-    margin-left: 180px;
-    margin-top: 110px;
+    margin-left: 123px;
+    margin-top: 112px;
     display: none;
     position:absolute;
     overflow: hidden;
@@ -230,19 +235,11 @@ html, body {
 .tvremotecontainer{
     display: inline-block;
     position: absolute;
-    right: 350;
+    left: 650;
     top:500;
     z-index: 1000000000;
     transform: rotate(-5deg);
     display:none;
-}
-
-.oldtvcontainer{
-    position: absolute;
-    top: 1%;
-    left: 0;
-    height: 100%;
-    z-index:1000;
 }
 
 .moreinfo{
@@ -266,7 +263,7 @@ html, body {
 .wallart{
     position: absolute;
     top: 90px;
-    left: 1050px;
+    left: 900;
     width: 270px;
     height: 360px;
 }
@@ -291,16 +288,22 @@ html, body {
     position: absolute;
 }
 
+.sidewallcontainer{
+    display: inline-block;
+    position: absolute;
+    right: 0;
+}
+
 .floorcontainer{
     position: absolute;
     top: 1040;
-    left: -500;
     overflow: visible;
 }
 
 .hardwoodcontainer{
     overflow:hidden;
     width: 100%;
+    position: relative;
 }
 
 .hardwood{
@@ -312,14 +315,15 @@ html, body {
  .rug{
     position: absolute;
     top: 60;
-    left: 1200;
+    left: 600;
+    width: 600;
     z-index: 10;
  }
 
 .dog{
     position: absolute;
     top: -70;
-    left: 1300;
+    left: 715;
     z-index: 10;
 
 }
@@ -548,36 +552,72 @@ html, body {
 }
 
 @media (max-width: 479px) {
+    .main{
+        min-height:auto;
+    }
+    .loading{
+        font-size: 25;
+        font-family: 'Special Elite', sans-serif;
+        margin-top: 53;
+        margin-left: 105;
+    }
     .oldtv{
-        margin-top:20px;
-        margin-left:20px;
+        margin-top: 0px;
+        margin-left: 0px;
+        width: 365;
+    }
+    .oldtvremote{
+        content:url(../images/oldtvremotemobile.png);
     }
     .channeldisplay{
-        top: 140;
-        left: 743
+        top: 60;
+        left: 309;
+        width: 25px;
+        height: 22px;
+        font-size: 18px;
     }
     .channelvideocontainer{
-        margin-left:110px;
-        margin-top:96px;
+        margin-left: 40px;
+        margin-top: 32px;
+        width: 245;
+        height: 195;
     }
     .floorcontainer{
-        bottom: 155;
-        left:-580
+        top:auto;
+        bottom: 0;
     }
     .hardwood{
-        max-width:190%;
+        content:url(../images/hardwood_mobile.png);
+        max-width:102%;
     }
     .rug{
-        top:70;
-        left:760;
+        top: 30;
+    left: 15;
+    width: 375;
     }
     .dog{
-        left:850;
+        top: -30;
+        left: 10;
+        transform: scaleX(-1);
+    }
+    .barley{
+        width:240;
     }
     .wallart{
-        top:600;
-        left:500;
-        width:350px;
-        height:420px;
+        top: 210;
+        left: 220;
+        width: 150px;
+        height: 200px;
+        z-index: 1;
+    }
+    .tvremotecontainer{
+        left: 150;
+        top: 300;
+        transform:rotate(0deg);
+    }
+    .sound{
+        bottom: 7px;
+        left: 7px;
+        filter: invert(1);
     }
 }
