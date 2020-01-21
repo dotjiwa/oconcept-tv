@@ -1,23 +1,99 @@
 "use strict";
 
+//Load service worker
+// Check that service workers are supported
+if ('serviceWorker' in navigator) {
+    // Use the window load event to keep the page load performant
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js');
+        navigator.serviceWorker.addEventListener('message', event => progress(event.data));
+    });
+}
+
+function progress({ loaded, total }) {
+    //$(".loading").text("Loading " + Math.round(loaded / total * 100) + '%');
+}
+
 //Page load
-$(window).on("load", function () {
+var isMobile;
+$(window).on("load", function() {
+
+    //set current screen is mobile flag
+    checkForMobile();
+
+    //execute main functions
     main();
 });
 
+function checkForMobile() {
+    if (window.screen.availWidth > 479)
+        isMobile = false;
+    else
+        isMobile = true;
+}
+
 async function main() {
 
-    $(".loading").show();
+    //show intro and get user media permission
+    var introPromise = intro();
 
-    //Animate TV
-    animateOldTv();
+    //fetch tv animation points
+    // var tvPromise = fetchTVAnimationPoints();
 
-    animateWallArt();
+    // when both are done, animate tv 
+    // Promise.all([introPromise, tvPromise]).then(() => {
+    //     paintTV().catch((err) => { logMessage(err.message) });
+    // });
 
     //Start preloading video
     addVideoChannels();
 
+    //start fetching animation points and animation wall art
+    animateWallArt();
+
+    //start dog "gif" 
     runBarleyGirl();
+}
+
+async function intro() {
+    return new Promise(async(resolve, reject) => {
+        // var typeEffect = new TypeEffect(".introtext", 125);
+        // await typeEffect.tellStory(["OConcept", "development"]);
+        $(".introtext").addClass("typewriter");
+        $(".introtext").css("display", "inline-block");
+        await timeout(4000);
+        // $(".intro").addClass("introanimate");
+        // $(".intro").hide(6000);
+        // $(".intro").one("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd", async function() {
+        $(".intro").effect("slide", { direction: "up", mode: 'hide', duration: 1500 }, async function() {
+
+
+            //make sure tv image is loaded
+            if (!document.getElementsByClassName("oldtv")[0].complete ||
+                document.getElementsByClassName("oldtv")[0].naturalwidth == "0")
+                $(".oldtv").on("load", async function() {
+                    //Make request to fill tv reflection with user video
+                    await getUserVideo().catch((err) => { logMessage(err.message) });
+                    onIntroEnd(resolve);
+                })
+            else {
+                //Make request to fill tv reflection with user video
+                await getUserVideo().catch((err) => { logMessage(err.message) });
+                onIntroEnd(resolve);
+            }
+
+        });
+    });
+}
+
+function onIntroEnd(resolve) {
+    $(".oldtvcontainer").css("opacity", "1");
+    $(".oldtvcontainer").one("transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd", function() {
+        $(".wallart").effect("slide", { direction: "up", mode: 'show', duration: 1500 });
+        $(".oldtvremote").effect("slide", { direction: "right", mode: 'show', duration: 1500 });
+        registerEvents();
+        resolve();
+    });
 }
 
 async function animateWallArt() {
@@ -26,16 +102,25 @@ async function animateWallArt() {
     //Load data files
     for (var i = 0; i < wallArtImages.length; i++) {
         var wallArtImage = wallArtImages[i];
-        //Get Image Data Points
-        var url = "datafiles/wallart/" + wallArtImage.filename + ".json";
-        if (checkUrl(url)) {
-            //Load image data from files
-            wallArtImage.data = await $.getJSON(url, { format: "json"}).catch((err) => { logMessage(err.message) });
 
-            wallArtImage.data = shuffle(wallArtImage.data);
-
-            logMessage("DATA FILE PATH PROCESSED : " + url + " Length: " + wallArtImage.data.length);
+        //Fetch files to compile all data points for animation
+        var filePrefix = "-partial-";
+        var promises = [];
+        var urls = [];
+        for (var f = 0; f < 10; f++) {
+            //Get Image Data Points
+            urls.push("datafiles/wallart/" + wallArtImage.filename + filePrefix + f.toString() + ".json?requestId=1");
         }
+
+        await Promise.all(urls.map(u => fetch(u))).then(responses =>
+            Promise.all(responses.map(res => res.json()))).then(values => {
+            wallArtImage.data = [];
+            for (var f = 0; f < values.length; f++) {
+                wallArtImage.data = wallArtImage.data.concat(values[f]);
+            }
+            wallArtImage.data = shuffle(wallArtImage.data);
+            logMessage("Wall art: " + wallArtImage.filename + " successfully constructed. Length: " + wallArtImage.data.length)
+        });
     }
 
     //Animate images
@@ -46,8 +131,7 @@ async function animateWallArt() {
         var imagePath = "images/wallart/" + wallArtImage.filename + ".png";
 
         var art = new OConceptAnimate(
-            wallArtImage.filename,
-            ["wallartcanvas"],
+            wallArtImage.filename, ["wallartcanvas"],
             imagePath,
             null,
             "wallart",
@@ -61,7 +145,7 @@ async function animateWallArt() {
         await timeout(3000);
 
         //remove canvas element of previous iteration
-        if(previousImageFileName != "")
+        if (previousImageFileName != "")
             $("." + previousImageFileName).remove();
         //save canvas name for removal
         previousImageFileName = wallArtImage.filename;
@@ -77,91 +161,56 @@ async function animateWallArt() {
 var TVDATA = [];
 var TVPAINTED;
 var TVENDEVENTSCOMPLETED = false;
-async function animateOldTv() {
-    return new Promise(async (resolve, reject) => {
+var lastPercentage = 0;
+async function fetchTVAnimationPoints() {
+    return new Promise(async(resolve, reject) => {
 
-        if(TVDATA.length == 0){
-
-            var totalCompletedBytes = [];
-            var totalBytes = [];
-
-            function getSum(arr){
-                var total = 0;
-
-                $.each(arr, function() {
-                    total += this.value;
-                });
-
-                return total;
-            }
+        if (TVDATA.length == 0) {
 
             //Fetch files to compile all data points for animation
             var sourceFolder = "datafiles/oldtv/";
-            var filePrefix = "oldtv-partial-";  
+            var desktopPrefix = "oldtv-partial-";
+            var mobilePrefix = "oldtv-partial-mobile-";
+            var filePrefix;
             var promises = [];
-            for(var i= 0; i < 10;i++){
-                var url = sourceFolder + filePrefix + i.toString() + ".json";
-                
-                var firstCall = true;
-                if (checkUrl(url)) {
-                    //Load image data from files
-                     var promise = $.ajax({
-                        dataType: "json",
-                        url: url,
-                        progress: function (e) {
-                            if (e) {
-                                if (e.lengthComputable) {
-                                    //if first returned item FOR THIS PROMISE, insert
-                                    if(!totalBytes[i])
-                                        totalBytes.push({id: i, value: e.total});
+            var urls = []
 
-                                    if(!totalCompletedBytes[i])
-                                        totalCompletedBytes.push({id: i, value: e.loaded});
-                                    else
-                                        $.each(totalCompletedBytes, function() {
-                                            if (this.id === i) {
-                                                this.value = e.loaded;
-                                            }
-                                        });;
+            //Get correct files to animate based on screen width
+            if (isMobile)
+                filePrefix = mobilePrefix;
+            else
+                filePrefix = desktopPrefix;
 
-                                    var completedPercentage = Math.round((getSum(totalCompletedBytes) * 100) / getSum(totalBytes));
-                                    if (completedPercentage <= 100)
-                                        $(".loading").text("Loading " + completedPercentage + "%");
-                                }
-                            }
-                        },
-                        error: function (xhr, ajaxOptions, thrownError) {
-                            logMessage(xhr.status + " " + xhr.responseText);
-                            logMessage(thrownError);
-                        }        
-                    }); 
-                    
-                    promises.push(promise);
-                }
+            //First, put urls to files in array
+            for (var i = 0; i < 10; i++) {
+                urls.push(sourceFolder + filePrefix + i.toString() + ".json?requestId=1");
             }
-        
-            await Promise.all(promises).then(values => { 
-                for(var i = 0; i < values.length;i ++){
+
+            //Then, Get data from multiple partial files and put back together
+            //Top call is the initial fetch of each file using .map
+            Promise.all(urls.map(u => fetch(u))).then(responses =>
+                //Then we parse the json from the response
+                Promise.all(responses.map(res => res.json()))).then(async values => {
+                //Once that is done, we combine all the data into a single array
+                for (var i = 0; i < values.length; i++) {
                     TVDATA = TVDATA.concat(values[i]);
                 }
+                //Log
                 logMessage("TV File successfully constructed. Length: " + TVDATA.length)
-                $(".loading").hide();
-            });;
 
-            //TVDATA = shuffle(TVDATA);
+                $(".wallart").show();
 
-            //Make request to fill tv reflection with user video
-            await getUserVideo();
+                //shuffle the data for animation effect
+                TVDATA = shuffle(TVDATA);
 
-            await paintTV();
-
-            resolve();
+                resolve();
+            });
         }
     });
 }
 var TVCOUNTER = 0;
-async function paintTV(){
-    if(TVPAINTED != true){
+async function paintTV() {
+    if (TVPAINTED != true) {
 
         //Designate colors to stage for animation
         var stagedColors = await determineStagedColors();
@@ -169,27 +218,43 @@ async function paintTV(){
         //get the number of currently painted tvs
         var numberOfPaintedElements = $(".oldtv").length;
 
+        var animateFilePath;
+        var imageReplacementFilePath;
+        var animateSpeed;
+        if (isMobile) {
+            animateFilePath = "images/oldtvfull1_tallsmall.png"
+            imageReplacementFilePath = "images/oldtvnoscreen1_tallsmall.png";
+            animateSpeed = 5000;
+        } else {
+            animateFilePath = "images/oldtvfull1_medium.png"
+            imageReplacementFilePath = "images/oldtvnoscreen1_medium.png";
+            animateSpeed = 10000;
+        }
+
+
         var tv = new OConceptAnimate(
-            "oldtv",
-            ["oldtv" + numberOfPaintedElements],
-            "images/oldtvfull1_medium.png",
-            "images/oldtvnoscreen1_medium.png",
+            "oldtv", ["oldtv" + numberOfPaintedElements],
+            animateFilePath,
+            imageReplacementFilePath,
             "oldtvcontainer",
             TVDATA,
-            8000,
+            animateSpeed,
             "all",
             "righttolefttop",
             stagedColors);
 
         var animateVariables = await tv.animateImage();
 
+        //Hide the loading message
+        $(".loading").hide();
+
         numberOfPaintedElements = $(".oldtv").length;
         //remove any extra painted items
-        if(numberOfPaintedElements > 1)
-            for(var i = 0; i < numberOfPaintedElements - 1; i++){
-                if($($(".oldtv")[i]).attr("class")){
-                    var number = parseInt($($(".oldtv")[i]).attr('class').split(" ")[0].replace("oldtv",""));
-                    if(number < numberOfPaintedElements - 2)
+        if (numberOfPaintedElements > 1)
+            for (var i = 0; i < numberOfPaintedElements - 1; i++) {
+                if ($($(".oldtv")[i]).attr("class")) {
+                    var number = parseInt($($(".oldtv")[i]).attr('class').split(" ")[0].replace("oldtv", ""));
+                    if (number < numberOfPaintedElements - 2)
                         $($(".oldtv")[i]).remove();
                 }
             }
@@ -197,7 +262,7 @@ async function paintTV(){
         //show channels
         TVPAINTED = true;
 
-        if(!TVENDEVENTSCOMPLETED){
+        if (!TVENDEVENTSCOMPLETED) {
             $(".channelvideocontainer").show();
 
             //Show channel display after TV done
@@ -207,20 +272,20 @@ async function paintTV(){
             $(".tvremotecontainer").show();
 
             registerEvents();
-            
+
             TVENDEVENTSCOMPLETED = true;
         }
     }
 }
 
-window.onresize = function(){
-    if(TVDATA.length == 0){
-        paintTV();
-    }
-}
+// window.onresize = function() {
+//     if (TVDATA.length == 0) {
+//         paintTV();
+//     }
+// }
 
 function determineStagedColors() {
-    return new Promise(async (resolve, reject) => {
+    return new Promise(async(resolve, reject) => {
         var stagedColors = []
         var currentColor = {
             redLowerLimit: 0,
@@ -269,44 +334,45 @@ function addVideoChannels() {
 
     //create video html elements for channels
     for (let index = 0; index < channels.Videos.length; index++) {
-        const video = channels.Videos[index];
+        const videoInfo = channels.Videos[index];
 
         //Concat class string
         var cssClassStr = "";
-        for (let c = 0; c < video.cssClasses.length; c++) {
-            cssClassStr += video.cssClasses[c] + " ";
+        for (let c = 0; c < videoInfo.cssClasses.length; c++) {
+            cssClassStr += videoInfo.cssClasses[c] + " ";
         }
 
-        var vidHtml = "<video id='" + video.videoName + "' class='" + cssClassStr.trim() + "'></video>";
+        var loopStr = videoInfo.loop ? "loop" : "";
+        var vidHtml = "<video id='" + videoInfo.videoName + "' class='" + cssClassStr.trim() + "' " + loopStr + " playsinline></video>";
 
         //Append video to DOM
         videoContainer.append(vidHtml);
 
+        //Set all event handlers on video 
+        setVideoEvents(videoInfo.videoName);
+
         //Preload video for quick play
-        preloadVideo(video.videoUrl, video.videoName, video.loop);
+        preloadVideo(videoInfo.videoUrl, videoInfo.videoName, videoInfo.loop);
     }
 }
 
+//Immmediately starts loading the full video
 function preloadVideo(vidUrl, videoName, videoLoop) {
     //get video element
     var video = document.getElementById(videoName);
 
-    //Set all event handlers on video 
-    setVideoEvents(videoName, video);
-
     //Preload video 
     fetch(vidUrl)
-        .then(function (response) {
-            response.blob().then(function (videoBlob) {
+        .then(function(response) {
+            response.blob().then(function(videoBlob) {
                 var vid = URL.createObjectURL(videoBlob); // IE10+
                 // Video is now downloaded
                 // and we can set it as source on the video element
                 video.src = vid;
-                video.loop = videoLoop; //set looping 
             });
 
         })
-        .catch(function (err) {
+        .catch(function(err) {
             logMessage("Error loading video : " + err.message);
         });
 
@@ -315,9 +381,13 @@ function preloadVideo(vidUrl, videoName, videoLoop) {
 //Accesses user camera to show reflection on tv
 async function getUserVideo() {
 
-    return new Promise(async function(resolve, reject){
-        
+    return new Promise(async function(resolve, reject) {
+
         var video = document.getElementById('usertvscreen');
+
+        if (navigator.mediaDevices === undefined) {
+            return reject('getUserMedia is not implemented in this browser');
+        }
 
         await activateUserVideoMessage();
 
@@ -325,72 +395,71 @@ async function getUserVideo() {
         // with getUserMedia as it would overwrite existing properties.
         // Here, we will just add the getUserMedia property if it's missing.
         if (navigator.mediaDevices.getUserMedia === undefined) {
-        navigator.mediaDevices.getUserMedia = function(constraints) {
+            navigator.mediaDevices.getUserMedia = function(constraints) {
 
-            // First get ahold of the legacy getUserMedia, if present
-            var getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+                // First get ahold of the legacy getUserMedia, if present
+                var getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
-            // Some browsers just don't implement it - return a rejected promise with an error
-            // to keep a consistent interface
-            if (!getUserMedia) {
-            return Promise.reject(new Error('getUserMedia is not implemented in this browser'));
+                // Some browsers just don't implement it - return a rejected promise with an error
+                // to keep a consistent interface
+                if (!getUserMedia) {
+                    return reject('getUserMedia is not implemented in this browser');
+                }
+
+                // Otherwise, wrap the call to the old navigator.getUserMedia with a Promise
+                return new Promise(function(resolve, reject) {
+                    getUserMedia.call(navigator, constraints, resolve, reject);
+                });
             }
+        }
 
-            // Otherwise, wrap the call to the old navigator.getUserMedia with a Promise
-            return new Promise(function(resolve, reject) {
-            getUserMedia.call(navigator, constraints, resolve, reject);
+        navigator.mediaDevices.getUserMedia({ audio: false, video: true })
+            .then(async function(stream) {
+
+                //handle user media message success
+                $(".accessstatus").text("Allowed!");
+                //fade out message
+                await timeout(3000);
+                $(".userMediaMessage").fadeOut(500);
+                PAUSECAMERAACCESSWAITING = true;
+
+                // Older browsers may not have srcObject
+                if ("srcObject" in video) {
+                    video.srcObject = stream;
+                } else {
+                    // Avoid using this in new browsers, as it is going away.
+                    video.src = window.URL.createObjectURL(stream);
+
+                }
+                video.play().catch((err) => { logMessage("Error playing user video : " + err.message); });
+                $(".usertvscreencontainer").show();
+
+                //hide placeholder
+                $(".oldtvscreen").hide();
+
+                resolve();
+            }).catch(async(err) => {
+
+                logMessage("Access user camera : " + err.message);
+
+                //handle user media message blocked
+                $(".accessstatus").text("Blocked by user");
+                await timeout(3000);
+                PAUSECAMERAACCESSWAITING = true;
+                $(".userMediaMessage").fadeOut(500);
+                resolve();
+
             });
-        }
-        }
-
-        navigator.mediaDevices.getUserMedia({ audio: true, video: true })
-        .then(async function(stream) {
-
-            //handle user media message success
-            $(".accessstatus").text("Allowed!");
-            //fade out message
-            await timeout(3000);
-            $(".userMediaMessage").fadeOut(500);
-            PAUSECAMERAACCESSWAITING = true;
-
-            // Older browsers may not have srcObject
-            if ("srcObject" in video) {
-                video.srcObject = stream;
-            } 
-            else {
-                // Avoid using this in new browsers, as it is going away.
-                video.src = window.URL.createObjectURL(stream);
-
-            }
-            video.play();
-            $(".usertvscreencontainer").show();
-
-            //hide placeholder
-            $(".oldtvscreen").hide();
-
-            resolve();                   
-        }).catch(async (err) => {
-
-            logMessage("Access user camera : " + err.message);
-
-            //handle user media message blocked
-            $(".accessstatus").text("Blocked by user");
-            await timeout(3000);
-            PAUSECAMERAACCESSWAITING = true;
-            $(".userMediaMessage").fadeOut(500);
-            resolve();
-
-        });
     });
 }
 
 var PAUSECAMERAACCESSWAITING = false;
-async function activateUserVideoMessage(){
+async function activateUserVideoMessage() {
 
     //check if camera has been approved already by the user
     var userHasCameraApproved = await checkIsCameraApproved();
 
-    if(!userHasCameraApproved){
+    if (!userHasCameraApproved) {
 
         //Explain to the user why we want camera access
         $(".userMediaMessage").show();
@@ -401,9 +470,9 @@ async function activateUserVideoMessage(){
         var i = 0;
         var colors = OConceptColors();
         var intervalId = setInterval(
-            function(){
+            function() {
 
-                if(!PAUSECAMERAACCESSWAITING){
+                if (!PAUSECAMERAACCESSWAITING) {
 
                     var dotRef = $(dots[dot]);
 
@@ -411,43 +480,42 @@ async function activateUserVideoMessage(){
                     dotRef.css("color", colors[i]);
 
                     //set former dot white
-                    if(dot == 0 && i == 0 ){
+                    if (dot == 0 && i == 0) {
                         //first dot, do nothing
-                    }
-                    else if(dot == 0)
+                    } else if (dot == 0)
                         $(dots[dots.length - 1]).css("color", "white");
                     else
-                        $(dots[dot-1]).css("color", "white");
+                        $(dots[dot - 1]).css("color", "white");
 
                     //restart loop when done
-                    if(i == colors.length - 1 )
-                        i=0;
+                    if (i == colors.length - 1)
+                        i = 0;
                     else
                         i++;
-                    
+
                     //restart dots
-                    if(dot == dots.length - 1)
+                    if (dot == dots.length - 1)
                         dot = 0;
                     else
                         dot++;
-                }
-                else {
+                } else {
                     clearInterval(intervalId);
                 }
 
-        }, 200);
+            }, 200);
     }
 }
 
-function checkIsCameraApproved(){
+function checkIsCameraApproved() {
     return navigator.mediaDevices.enumerateDevices()
-      .then(infos =>
-        // if any of the MediaDeviceInfo has a label, we're good to go
-        [...infos].some(info=>info.label!=="")
-      );
-  }
+        .then(infos =>
+            // if any of the MediaDeviceInfo has a label, we're good to go
+            [...infos].some(info => info.label !== "")
+        );
+}
 
 var TVISON = false;
+
 function goToNextChannel() {
     if (TVISON) {
 
@@ -462,7 +530,7 @@ function goToNextChannel() {
         //Find next channel
         var channels = new OConceptChannelVideos().Videos;
         var nextChannel;
-        var nextChannels = channels.filter(function (c) {
+        var nextChannels = channels.filter(function(c) {
             return c.channelNumber == currentChannel.channelNumber + 1;
         })
         if (nextChannels.length > 0)
@@ -490,9 +558,9 @@ function goToNextChannel() {
 //contols the dog gif-esque animation
 //just rotating images to keep transparent background
 var PAUSEBARLEYGIRL;
-async function runBarleyGirl(){
-   
-    if(!PAUSEBARLEYGIRL){
+async function runBarleyGirl() {
+
+    if (!PAUSEBARLEYGIRL) {
 
         $(".barleysmile").show();
         await timeout(2000);
@@ -519,13 +587,13 @@ function goToChannel(channelNumber) {
         //Find next channel
         var channels = new OConceptChannelVideos().Videos;
         var nextChannel;
-        var nextChannels = channels.filter(function (c) {
+        var nextChannels = channels.filter(function(c) {
             return c.channelNumber == channelNumber;
         })
         if (nextChannels.length > 0 && nextChannels[0].channelNumber != -1)
             nextChannel = nextChannels[0];
         else
-            return false  // if no channel, don't do anything
+            return false // if no channel, don't do anything
 
         //Pause current channel
         var currentChannelVideo = $("#" + currentChannel.videoName);
@@ -570,7 +638,7 @@ function goToLastChannel() {
         //Find next channel
         var channels = new OConceptChannelVideos().Videos;
         var nextChannel;
-        var nextChannels = channels.filter(function (c) {
+        var nextChannels = channels.filter(function(c) {
             return c.channelNumber == currentChannel.channelNumber - 1;
         })
         if (nextChannels.length > 0 && nextChannels[0].channelNumber != -1)
@@ -595,6 +663,7 @@ function goToLastChannel() {
 }
 
 var channelUpdated = false;
+
 function updateChannelSelection(num) {
 
     if (TVISON) {
@@ -602,11 +671,10 @@ function updateChannelSelection(num) {
         if (channelDisplay.length < 2) {
             var channelDisplay = $(".channeldisplay").text();
             $(".channeldisplay").text(channelDisplay + num.toString());
-        }
-        else
+        } else
             $(".channeldisplay").text(num.toString());
 
-        setTimeout(async function () {
+        setTimeout(async function() {
             if (!channelUpdated) {
                 channelDisplay = $(".channeldisplay").text();
                 if (!goToChannel(parseInt(channelDisplay))) {
@@ -619,13 +687,12 @@ function updateChannelSelection(num) {
                     $(".channeldisplay").text("");
                     await timeout(500);
                     $(".channeldisplay").text(currentChannel.channel);
-                    channelUpdated = true;              
+                    channelUpdated = true;
 
-                    setTimeout(async function () {
+                    setTimeout(async function() {
                         channelUpdated = false;
                     }, 1000)
-                }
-                else{ //if the channel is updated
+                } else { //if the channel is updated
                     updateMoreInfo()
                 }
 
@@ -648,8 +715,7 @@ function updateMoreInfo(hide = false) {
         if (currentChannel.videoClickType == "wikipedia") {
             var wikiTitle = currentChannel.videoClickUrl.substr(currentChannel.videoClickUrl.lastIndexOf("/") + 1);
             url = "https://en.wikipedia.org/w/index.php?title=" + wikiTitle + '&printable=yes';
-        }
-        else
+        } else
             url = currentChannel.videoClickUrl;
 
         var iframe = document.getElementsByClassName("moreinfo")[0];
@@ -663,7 +729,8 @@ function timeout(ms) {
 }
 
 function shuffle(array) {
-    var m = array.length, t, i;
+    var m = array.length,
+        t, i;
 
     // While there remain elements to shuffle…
     while (m) {
@@ -681,10 +748,11 @@ function shuffle(array) {
 }
 
 var audio;
+
 function registerEvents() {
-    $("#buttononoff").on("click", function (e) {
+    $("#buttononoff").on("click", function(e) {
         //Turn on from off mode
-        if (!($("#statictv").is(":visible")) &&  //is static isnt showing
+        if (!($("#statictv").is(":visible")) && //is static isnt showing
             !($(".channelvideo").is(":visible"))) { //and channel video isn't playing 
 
             TVISON = true; //set TV on flag 
@@ -692,11 +760,10 @@ function registerEvents() {
             $(".oldtvscreen").css("opacity", ".2"); //keep reflection on tv, but increase transparancy
             //play turning on video clip
             document.getElementById("TVTurningOn").play().catch((err) => { logMessage(err.message) });
-        }
-        else { //Turn off
+        } else { //Turn off
             updateMoreInfo(true); //close more info window if open
             TVISON = false; //set tv is off flag
-            currentChannel = new OConceptChannelVideos().Videos[0];//reset current channel to 00
+            currentChannel = new OConceptChannelVideos().Videos[0]; //reset current channel to 00
             $(".channelvideo").trigger("pause"); //pause current video
             $(".channelvideo").hide(); //hide current video
             $("#TVTurningOff").show(); //show turning off video
@@ -707,19 +774,19 @@ function registerEvents() {
     });
 
     //Channel up event
-    $("#buttonchannelup").on("click", function (e) {
+    $("#buttonchannelup").on("click", function(e) {
         goToNextChannel();
         updateMoreInfo();
     })
 
     //Channel down event
-    $("#buttonchanneldown").on("click", function (e) {
+    $("#buttonchanneldown").on("click", function(e) {
         goToLastChannel();
         updateMoreInfo()
     })
 
     //Full screen event
-    $("#buttonfullscreen").on("click", function (e) {
+    $("#buttonfullscreen").on("click", function(e) {
         if (TVISON) {
             if (currentChannel.channelNumber != 0)
                 if ((window.fullScreen) ||
@@ -733,7 +800,7 @@ function registerEvents() {
     })
 
     //More Info event 
-    $("#buttonmoreinfo").on("click", function (e) {
+    $("#buttonmoreinfo").on("click", function(e) {
         if (TVISON) {
             if (currentChannel.channelNumber != 0) {
                 updateMoreInfo();
@@ -745,55 +812,55 @@ function registerEvents() {
         }
     });
 
-    $("#buttonnumberone").on("click", function (e) {
+    $("#buttonnumberone").on("click", function(e) {
         updateChannelSelection(1);
     });
 
-    $("#buttonnumbertwo").on("click", function (e) {
+    $("#buttonnumbertwo").on("click", function(e) {
         updateChannelSelection(2);
     });
 
-    $("#buttonnumberthree").on("click", function (e) {
+    $("#buttonnumberthree").on("click", function(e) {
         updateChannelSelection(3);
     });
 
-    $("#buttonnumberfour").on("click", function (e) {
+    $("#buttonnumberfour").on("click", function(e) {
         updateChannelSelection(4);
     });
 
-    $("#buttonnumberfive").on("click", function (e) {
+    $("#buttonnumberfive").on("click", function(e) {
         updateChannelSelection(5);
     });
 
-    $("#buttonnumbersix").on("click", function (e) {
+    $("#buttonnumbersix").on("click", function(e) {
         updateChannelSelection(6);
     });
 
-    $("#buttonnumberseven").on("click", function (e) {
+    $("#buttonnumberseven").on("click", function(e) {
         updateChannelSelection(7);
     });
 
-    $("#buttonnumbereight").on("click", function (e) {
+    $("#buttonnumbereight").on("click", function(e) {
         updateChannelSelection(8);
     });
 
-    $("#buttonnumbernine").on("click", function (e) {
+    $("#buttonnumbernine").on("click", function(e) {
         updateChannelSelection(9);
     });
 
     var INVERTED = false;
     var PAUSEPSYCEDELIC = false;
     var backgroundImageCSSValue;
-    $("#buttoninvert").on("click", function (e) {
-        
+    $("#buttoninvert").on("click", function(e) {
+
         //invert
         //invertPage();
 
         //handle barley
         $(".barleycontainer").toggle();
         $(".barleyskeleton").toggle();
-        if(!INVERTED){
-           //show barley skeleton
+        if (!INVERTED) {
+            //show barley skeleton
             INVERTED = true;
             PAUSEBARLEYGIRL = true;
             PAUSEPSYCEDELIC = false;
@@ -805,33 +872,30 @@ function registerEvents() {
             var i = 0
             var colors = OConceptColors();
             var psychodelicIntervalId = setInterval(
-                function(){
+                function() {
 
-                    if(!PAUSEPSYCEDELIC){
+                    if (!PAUSEPSYCEDELIC) {
                         //set background color
                         $(".main").css("background-color", colors[i]);
                         //restart loop when done
-                        if(i == colors.length - 1 )
-                            i=0;
+                        if (i == colors.length - 1)
+                            i = 0;
                         else
                             i++;
-                        }
-                    else
+                    } else
                         clearInterval(psychodelicIntervalId)
 
-            }, 200);
+                }, 200);
 
             //reset CAST scrolling credits animation
             $(".castcontainer").css("animation", "none");
-            setTimeout(function(){
+            setTimeout(function() {
                 $(".castcontainer").css("animation", "");
-            }
-            , 10);
+            }, 10);
 
-            
-    
-        }
-        else{
+
+
+        } else {
             //hide barley skeleton
             INVERTED = false;
             PAUSEBARLEYGIRL = false;
@@ -842,7 +906,7 @@ function registerEvents() {
             $(".main").css("background-color", "");
             $(".main").css("background-image", backgroundImageCSSValue);
 
-            runBarleyGirl();        
+            runBarleyGirl();
         }
 
         //handles credits rolling
@@ -850,7 +914,7 @@ function registerEvents() {
 
     });
 
-    $(".sound").on("click", function (e) {
+    $(".sound").on("click", function(e) {
         $(".sound > .yes").toggle();
         $(".sound > .no").toggle();
 
@@ -858,17 +922,17 @@ function registerEvents() {
             audio = new Audio('audio/CleverSkipper.mp3');
             audio.loop = true;
             audio.play().catch((err) => logMessage(err.message));
-        }
-        else {
+        } else {
             audio.pause().catch((err) => logMessage(err.message));
         }
     });
 }
 
-function setVideoEvents(videoName, video) {
+function setVideoEvents(videoName) {
+    var video = document.getElementById(videoName);
     //video clip tv turning on events
     if (videoName == "TVTurningOn") {
-        video.onended = function (e) {
+        video.onended = function(e) {
             $("#TVTurningOn").hide();
             showStatic();
             $(".channeldisplay").text("00");
@@ -878,7 +942,7 @@ function setVideoEvents(videoName, video) {
     }
     //video clip tv turning off events
     if (videoName == "TVTurningOff") {
-        video.onended = function (e) {
+        video.onended = function(e) {
             $("#TVTurningOff").hide();
             $(".channeldisplay").text("");
             $("#usertvscreen").css("opacity", ".1");
@@ -918,6 +982,7 @@ function closeFullscreen() {
         document.msExitFullscreen();
     }
 }
+
 function showStatic(isFullScreen = false) {
     STATIC = true;
     //display static canvas to provide width
@@ -944,7 +1009,7 @@ function checkUrl(url) {
 }
 
 async function animatePhrase(phrase) {
-    return new Promise(async (resolve, reject) => {
+    return new Promise(async(resolve, reject) => {
         var ocLetters = new OConnceptAnimateLetters();
         var phraseCharactersToAnimate = [];
 
@@ -953,7 +1018,7 @@ async function animatePhrase(phrase) {
         for (var i = 0; i < phrase.length; i++) {
             var c = phrase.charAt(i);
             if (c != " ") {
-                var characterInfo = Object.create(ocLetters.Ryan.filter(function (l) { return l.character == c })[0]);
+                var characterInfo = Object.create(ocLetters.Ryan.filter(function(l) { return l.character == c })[0]);
                 console.log("START : " + characterInfo.character);
 
                 characterInfo.containerClass = "word" + words.length.toString();
@@ -964,8 +1029,7 @@ async function animatePhrase(phrase) {
                     if (characterInfo.case == "upper") {
                         pathSegment = "/letters" + ocLetters.RyanPath + "uppercase_" + characterInfo.character.toLowerCase();
                         characterInfo.fileNamePrefix = "uppercase_" + characterInfo.character.toLowerCase();
-                    }
-                    else {
+                    } else {
                         pathSegment = "/letters" + ocLetters.RyanPath + characterInfo.character.toLowerCase();
                         characterInfo.fileNamePrefix = characterInfo.character.toLowerCase();
                     }
@@ -984,8 +1048,7 @@ async function animatePhrase(phrase) {
                 }
 
                 phraseCharactersToAnimate.push(characterInfo);
-            }
-            else {
+            } else {
                 words.push("word" + words.length.toString());
             }
         }
@@ -999,8 +1062,7 @@ async function animatePhrase(phrase) {
         for (var i = 0; i < phraseCharactersToAnimate.length; i++) {
             var characterToAnimate = phraseCharactersToAnimate[i];
             var letter = new OConceptAnimate(
-                characterToAnimate.fileNamePrefix + i.toString(),
-                ["letter", characterToAnimate.fileNamePrefix],
+                characterToAnimate.fileNamePrefix + i.toString(), ["letter", characterToAnimate.fileNamePrefix],
                 characterToAnimate.imageFilePath,
                 characterToAnimate.containerClass,
                 characterToAnimate.data,
@@ -1026,8 +1088,7 @@ function invertPage() {
         '-o-filter: invert(100%);' +
         '-ms-filter: invert(100%); ' +
         'filter: invert(100%); ' +
-        'filter: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><filter id=\'invert\'><feColorMatrix in=\'SourceGraphic\' type=\'matrix\' values=\'-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0\'/></filter></svg>#invert"); }'
-        ,
+        'filter: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><filter id=\'invert\'><feColorMatrix in=\'SourceGraphic\' type=\'matrix\' values=\'-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0\'/></filter></svg>#invert"); }',
 
         head = document.getElementsByTagName('head')[0],
         style = document.createElement('style');
@@ -1051,9 +1112,9 @@ function invertPage() {
 }
 
 //Avoid `console` errors in browsers that lack a console.
-(function () {
+(function() {
     var method;
-    var noop = function () { };
+    var noop = function() {};
     var methods = [
         'assert', 'clear', 'count', 'debug', 'dir', 'dirxml', 'error',
         'exception', 'group', 'groupCollapsed', 'groupEnd', 'info', 'log',

@@ -1,623 +1,878 @@
-@import url('https://fonts.googleapis.com/css?family=Special+Elite&display=swap');
-@import url("/fonts/FiftiesMovies.ttf");
+/* mobile first */
 
-html, body {
-    cursor:url(../images/ochand.png) 1 17, auto;
-    margin:0;
+@import url('https://fonts.googleapis.com/css?family=Montserrat:700,800,900&display=swap');
+html,
+body {
+    cursor: url(../images/ochand.png) 1 17, auto;
+    margin: 0;
     padding: 0;
     background-color: black;
+    overflow-y: hidden;
+    overflow-x: hidden;
+    height: 100%;
+    position: relative;
 }
 
-.loading{
-    font-size: 42;
-    font-family: 'Special Elite', sans-serif;
-    margin-top: 100;
-    margin-left: 300;
-    color: #0a0a0a;
-    position:absolute;
-    display:none;
-}
-
-.main{
-    min-height: 1240px;
-    height:100%;
+.main {
+    min-height: auto;
+    height: 100%;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
     overflow-y: scroll;
-    background-image: url(../images/bricks.png);
-    /* background-position: -110px; */
+    background-image: url(../images/bricks_mobile.png);
+    /* background-position-x: center; */
     background-repeat: no-repeat;
     background-size: cover;
-    margin:0;
-    padding:0;
-    z-index:1;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    z-index: 1;
 }
 
-
-.oldtvcontainer{
-    position: relative;
-    top: 0;
-    left: 0;
-    z-index:1000;
+.intro {
+    position: absolute;
+    min-width: 100%;
+    min-height: 100%;
+    background: black;
+    vertical-align: middle;
+    text-align: center;
+    z-index: 30;
 }
 
-.oldtv{
-    margin-top: 40px;
-    margin-left: 30px;
-    width: 852px;
+.introtext {
+    font-size: 1.7em;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: "900";
+    color: white;
+    margin-top: 48%;
+    max-width: 40%;
+    display: none;
+}
+
+.introtext>h3>span {
+    text-transform: uppercase;
+    letter-spacing: 6.8;
+    padding-left: 5px;
+    font-size: .01em;
+}
+
+.phrase {
+    color: inherit;
+}
+
+#phrase1 {
+    font-size: 20;
+}
+
+.loading {
+    font-size: 25;
+    font-family: 'Special Elite', sans-serif;
+    margin-top: 35;
+    margin-left: 210;
+    color: #0a0a0a;
+    position: absolute;
+    -webkit-text-stroke-width: thin;
+    display: none;
+}
+
+.oldtv {
+    margin-top: 0px;
+    margin-left: 0px;
+    width: 325;
     height: auto;
     position: absolute;
+    z-index: 100;
+    /* content: url(../images/oldtvnoscreen1_tallsmall.png); */
 }
 
-.channeldisplay{
+.oldtvcontainer {
     position: absolute;
-    top: 180;
-    left: 755;
+    bottom: 83%;
+    left: 20;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 2s ease-in-out;
+    -webkit-transition: opacity 2s ease-in-out;
+    -moz-transition: opacity 2s ease-in-out;
+    -o-transition: opacity 2s ease-in-out;
+}
+
+.oldtvscreen {
+    height: inherit;
+    width: inherit;
+    z-index: 10;
+    position: absolute;
+}
+
+.tvremotecontainer {
+    left: 220;
+    bottom: -350;
+    transform: rotate(-5deg);
+    -webkit-transform: rotate(-5deg);
+    position: relative;
+    z-index: 100000000;
+    display: inline-block;
+}
+
+.oldtvremote {
+    /* content: url(../images/oldtvremotemobile2.png); */
+    width: 200px;
+    height: auto;
+    display: none;
+}
+
+.channeldisplay {
+    top: 50;
+    left: 277;
+    width: 25px;
+    height: 22px;
+    font-size: 18px;
+    position: absolute;
     text-align: center;
     background: #444242;
     border-radius: 4px;
     opacity: .9;
     font-family: 'Apple II Screen Typeface', sans-serif;
-    font-size: 38;
-    width: 55;
-    height: 50;
     color: #bd3636;
-    display:none;
-    z-index:1;
+    /* display: none; */
+    z-index: 1000;
 }
 
-
-
-.oldtvscreen{
-    height: inherit;
-    width: inherit;
+.channelvideocontainer {
+    margin-left: 32px;
+    margin-top: 25px;
+    width: 224;
+    height: 175;
     z-index: 10;
+    /* display: none; */
     position: absolute;
-
-    /* opacity: 0.6; */
+    overflow: hidden;
+    background: #332f2f;
 }
 
-.usertvscreencontainer{
+.usertvscreencontainer {
     height: inherit;
     width: inherit;
     object-fit: cover;
-    display:none;
-    z-index:10;
+    display: none;
+    z-index: 10;
     position: absolute;
 }
 
-#usertvscreen{
+#usertvscreen {
     height: inherit;
     width: inherit;
     object-fit: cover;
     opacity: .1;
     transform: rotateY(180deg);
-    -webkit-transform:rotateY(180deg); /* Safari and Chrome */
-    -moz-transform:rotateY(180deg); /* Firefox */
-    filter:        url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><filter id=\'grayscale\'><feColorMatrix type=\'matrix\' values=\'0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0 0 0 1 0\'/></filter></svg>#grayscale");
-   -webkit-filter: grayscale(100%);
-   -moz-filter:    grayscale(100%);
-   -ms-filter:     grayscale(100%);
-   -o-filter:      grayscale(100%);
-   filter: gray;
+    -webkit-transform: rotateY(180deg);
+    /* Safari and Chrome */
+    -moz-transform: rotateY(180deg);
+    /* Firefox */
+    filter: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><filter id=\'grayscale\'><feColorMatrix type=\'matrix\' values=\'0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0 0 0 1 0\'/></filter></svg>#grayscale");
+    -webkit-filter: grayscale(100%);
+    -moz-filter: grayscale(100%);
+    -ms-filter: grayscale(100%);
+    -o-filter: grayscale(100%);
+    filter: gray;
 }
 
-.tvstaticcontainer{
-
-}
-
-.channelvideo{
+.channelvideo {
     width: inherit;
     height: inherit;
     object-fit: cover;
     overflow: hidden;
     position: absolute;
     top: 0;
-    left:0;
-    display:none;
+    left: 0;
+    display: none;
     z-index: 1
 }
- .tvturning{
-    position: absolute; 
-    right: 0; 
+
+.tvturning {
+    position: absolute;
+    right: 0;
     bottom: 0;
-    min-width: 100%; 
+    min-width: 100%;
     min-height: 100%;
     width: auto;
     height: auto;
     object-fit: fill;
     background-size: cover;
     overflow: hidden;
-    opacity:.7;
+    opacity: .7;
     margin-top: -120;
- }
+}
 
+.floorcontainer {
+    top: auto;
+    bottom: 0;
+    position: absolute;
+    overflow: visible;
+    max-height: 35%;
+}
 
-.channelvideocontainer{
-    z-index: 10;
-    height: 460px;
-    width: 575px;
-    margin-left: 123px;
-    margin-top: 112px;
-    display: none;
-    position:absolute;
+.hardwoodcontainer {
+    width: 100%;
     overflow: hidden;
-    background: #332f2f;
+    position: relative;
 }
 
-.oldtvremote{
-    width:300px;
-    height:auto;
+.hardwood {
+    content: url(../images/hardwood_mobile.png);
+    width: 100%;
 }
 
-.remotebutton{
+.rug {
+    top: 30;
+    left: 15;
+    width: 365;
+    position: absolute;
+}
+
+.dog {
+    top: -30;
+    left: 40;
+    transform: scaleX(-1);
+    position: absolute;
+    z-index: 10;
+}
+
+.barley {
+    width: 250;
+    display: none;
+}
+
+.wallart {
+    top: 2;
+    left: 40;
+    position: absolute;
+    width: 120px;
+    height: 160px;
+    z-index: 1;
+    display: none;
+}
+
+.wallartframe {
+    z-index: 10;
+}
+
+.wallartplaceholder {
+    z-index: 1;
+}
+
+.wallartcanvas {
+    z-index: 1;
+    width: inherit;
+    height: inherit;
+    position: absolute;
+}
+
+.wallart>img {
+    width: inherit;
+    height: inherit;
+    position: absolute;
+}
+
+.sound {
+    bottom: 7px;
+    left: 7px;
+    filter: invert(1);
+    position: absolute;
+    display: none;
+    z-index: 10000 !important;
+}
+
+.sound>.yes {
+    display: none;
+    height: inherit;
+    width: 40px;
+    height: 40px;
+}
+
+.sound>.no {
+    height: inherit;
+    width: 40px;
+    height: 40px;
+}
+
+.moreinfo {
+    width: 100%;
+    height: 550px;
+    border: 1px solid #485b69;
+    border-radius: 5px;
+    opacity: .9;
+    background: white;
+    padding: 5px;
+}
+
+.moreinfocontainer {
+    top: 20px;
+    left: 20px;
+    position: absolute;
+    display: none;
+    z-index: 10000000;
+}
+
+.castcontainer {
+    padding: 5%;
+    margin: 5%;
+    position: absolute;
+    /* bottom: -100%; */
+    overflow-y: scroll;
+    text-align: center;
+    width: 90%;
+    animation: 12s credits linear infinite;
+    filter: invert(1) !important;
+    background-color: white;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    z-index: 10000000;
+    display: none;
+    opacity: .8;
+    /* display:none; */
+}
+
+.castHeader {
+    font-size: 64;
+    font-family: 'Fifties Movies', sans-serif;
+    margin-top: 20px;
+}
+
+.cast {
+    font-size: 32;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+}
+
+@keyframes credits {
+    0% {
+        top: 80%;
+    }
+    100% {
+        top: -130%;
+    }
+}
+
+@keyframes intro {
+    0% {
+        top: 0px;
+    }
+    100% {
+        top: -100%;
+    }
+}
+
+.creditheader {
+    margin-top: 30px;
+    font-size: 32;
+    font-weight: 800;
+}
+
+.credit {
+    margin-top: 10px;
+    font-weight: 800;
+}
+
+.table {
+    text-align: inherit;
+    width: 100%;
+    margin-top: 50px;
+    display: inline;
+}
+
+.tableheader {
+    text-align: inherit;
+    font-size: 48;
+    margin-top: 100px;
+    margin-bottom: 10px;
+}
+
+.column {
+    width: 48%;
+    padding: 2px;
+    font-size: 14px;
+}
+
+.column>div {
+    margin-bottom: 10px;
+}
+
+.columnone {
+    text-align: left;
+    float: left;
+}
+
+.columntwo {
+    float: right;
+    text-align: right;
+}
+
+.userMediaMessage {
+    z-index: 20;
+    background-color: black;
+    opacity: .8;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 22;
+    font-weight: 800;
+    text-transform: uppercase;
+    text-align: center;
+    vertical-align: middle;
+    padding: 10%;
+    width: 100%;
+    height: 100%;
+    padding-top: 20%;
+    position: fixed;
+    top: 0;
+    color: white;
+    display: none;
+    /* line-height: 1.2; */
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+.userMediaMessageHeader {
+    font-size: 2em;
+    text-transform: capitalize;
+    padding-bottom: 20px;
+}
+
+.accesswaiting>div {
+    float: left;
+    margin-left: 20px;
+    font-size: 42;
+}
+
+.accesswaiting {
+    display: inline-block;
+    margin-bottom: 30px;
+    margin-left: -20px;
+}
+
+.accessstatus {
+    margin-top: 10px;
+    margin-bottom: 30px;
+}
+
+.remotebutton {
     width: 18px;
     height: 18px;
     /* background: red; */
     display: inline-block;
     position: absolute;
     z-index: 1000000;
+    opacity: 0;
+    cursor: unset;
 }
 
-#buttononoff{
-    left: 103px;
-    top: 115px;
+#buttononoff {
+    left: 75;
+    top: 93;
 }
 
-#buttonchannelup{
-    left: 132px;
-    top: 105px;
+#buttonchannelup {
+    left: 104px;
+    top: 88px;
 }
 
-#buttonchanneldown{
-    left: 150px;
-    top: 140px;
+#buttonchanneldown {
+    left: 112px;
+    top: 118;
 }
 
-#buttonfullscreen{
-    left: 170;
-    top: 173;
+#buttonfullscreen {
+    left: 120;
+    top: 145;
 }
 
-#buttonmoreinfo{
-    left: 97;
-    top: 195;
+#buttonmoreinfo {
+    left: 52;
+    top: 158;
 }
 
-#buttonnumberone{
-    top: 47;
-    left: 40;
+#buttonnumberone {
+    top: 27;
+    left: 32;
 }
 
-#buttonnumbertwo{
+#buttonnumbertwo {
+    top: 22;
+    left: 58;
+}
+
+#buttonnumberthree {
+    top: 20;
+    left: 85;
+}
+
+#buttonnumberfour {
+    top: 48;
+    left: 34;
+}
+
+#buttonnumberfive {
+    top: 43;
+    left: 62;
+}
+
+#buttonnumbersix {
     top: 40;
-    left: 65;
+    left: 88;
 }
 
-#buttonnumberthree{
-    top: 33;
-    left: 90;
+#buttonnumberseven {
+    top: 70;
+    left: 38;
 }
 
-#buttonnumberfour{
-    top: 69;
-    left: 47;
+#buttonnumbereight {
+    top: 66;
+    left: 67;
 }
 
-#buttonnumberfive{
+#buttonnumbernine {
     top: 62;
-    left: 74;
+    left: 95;
 }
 
-#buttonnumbersix{
-    top: 54;
-    left: 100;
+#buttoninvert {
+    top: 150;
+    left: 85;
 }
 
-#buttonnumberseven{
-    top: 91;
-    left: 57;
-}
-
-#buttonnumbereight{
-    top: 86;
-    left: 87;
-}
-
-#buttonnumbernine{
-    top: 79;
-    left: 114;
-}
-
-#buttoninvert{
-    top: 183;
-    left: 134;
-}
-
-.tvremotecontainer{
-    display: inline-block;
-    position: absolute;
-    left: 650;
-    top:500;
-    z-index: 1000000000;
-    transform: rotate(-5deg);
-    display:none;
-}
-
-.moreinfo{
-    border: 1px solid #485b69;
-    border-radius: 5px;
-    opacity: .9;
-    width: 400px;
-    height: 550px;
-    background: white;
-    padding:5px;
-}
-
-.moreinfocontainer{
-    position: absolute;
-    top: 60px;
-    right: 20px;
-    display:none;
-    z-index:10000000;
-}
-
-.wallart{
-    position: absolute;
-    top: 90px;
-    left: 900;
-    width: 270px;
-    height: 360px;
-}
-
-.wallartframe{
-    z-index: 10;
-}
-
-.wallartplaceholder{
-    z-index: 1;
-}
-.wallartcanvas{
-    z-index: 1;
-    width:inherit;
-    height: inherit;
-    position: absolute;
-}
-
-.wallart > img{
-    width:inherit;
-    height: inherit;
-    position: absolute;
-}
-
-.sidewallcontainer{
-    display: inline-block;
-    position: absolute;
-    right: 0;
-}
-
-.floorcontainer{
-    position: absolute;
-    top: 1040;
-    overflow: visible;
-}
-
-.hardwoodcontainer{
-    overflow:hidden;
-    width: 100%;
-    position: relative;
-}
-
-.hardwood{
-    max-width:130%;
-    z-index:1;
-}
-
-
- .rug{
-    position: absolute;
-    top: 60;
-    left: 600;
-    width: 600;
-    z-index: 10;
- }
-
-.dog{
-    position: absolute;
-    top: -70;
-    left: 715;
-    z-index: 10;
-
-}
-
- .barley{
-     display:none;
-     width:500px;
- }
-
- .castcontainer{
-    padding: 10%;
-    margin: 10%;
-    position: absolute;
-    /* bottom: -100%; */
-    text-align: center;
-    width: 80%;
-    animation: 20s credits linear infinite;
-    filter: invert(1) !important;
-
-    background-color: white;
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
-    box-sizing: border-box;
-    z-index: 10000000;
-    display: none; 
-    opacity: .8;
-
-    /* display:none; */
-}
-
-.castHeader{
-    font-size: 64;
-    font-family: 'Fifties Movies', sans-serif;
-}
-
-.cast{
-    font-size: 36;
-    font-family: 'Fifties Movies', sans-serif;
-}
-
-@keyframes credits {
-    0% {
-      top: 100%;
+@media only screen and (min-width: 480px) {
+    html,
+    body {
+        overflow-y: visible;
+        height: auto;
+        position: auto;
     }
-    100% {
-      top: -100%;
+    .loading {
+        font-size: 42;
+        margin-top: 100;
+        margin-left: 410;
     }
-  }
-
-.creditheader{
-    margin-top: 30px;
-    font-size:48;
-}
-
-.credit{
-    margin-top: 10px;
-}
-
- .table{
-    text-align: inherit;
-    width: 80%;
-    margin-top: 50px;
-    display:inline;
- }
-
- .tableheader{
-    text-align: inherit;
-    font-size:48;
-    margin-top:100px;
-    margin-bottom:10px;
- }
-
- .column{
-     width:48%;
-     padding:5px;
- }
-
- .column > div{
-     margin-bottom:10px;
- }
-
- .columnone{
-    text-align:left;
-    float:left;
- }
-
- .columntwo{
-     float:right;
-     text-align:right;
-}
-
-.userMediaMessage{
-    z-index: 1000000000000;
-    background-color: black;
-    opacity : .8;
-    font-family: 'Fifties Movies', sans-serif;
-    font-size : 24;
-    text-align:center;
-    vertical-align: middle;
-    padding:10%;
-    width:100%;
-    height:100%;
-    position: fixed;
-    top:0;
-    color:white;
-    display:none;
-    line-height: 1.5;
-
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
-    box-sizing: border-box;
-}
-
-.accesswaiting > div{
-    float:left;
-    margin-left: 20px;
-    font-size:42;
-}
-
-.accesswaiting{
-    display: inline-block;
-    margin-bottom: 30px;
-    margin-left: -20px;
-}
-
-.accessstatus{
-    margin-top:10px;
-    margin-bottom:30px;
-}
-
-.userMediaMessageHeader{
-    font-size : 36;
-    padding-bottom: 20px;
-
-}
-
-.sound{
-    height:40px;
-    width:40px;
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    z-index:10000 !important;
-}
-.sound > .yes{
-    display:none;
-    height:inherit;
-}
-.sound > .no{
-    height:inherit;
-}
-
-.canvasimage{
-    z-index:-1;
-    display:none;
-}
-.canvascontainer{ 
-    display: inline-block;
-    vertical-align: middle;
-    height: 200px;
-    padding-top: 22%;
-    margin-left: 14%;
-    text-align: left;
-}
-
-.canvasboard{
-    width: 100%;
-    height: 100%;
-    position: relative;
-    /* text-align: center; */
-    z-index: 1000;
-}
-
-.letter {
-    width: 50px;
-    height: 70px;
-    vertical-align: top;
-    z-index:1;
-    display: inline-flex;
-    image-rendering: optimizeSpeed;
-    image-rendering: -moz-crisp-edges;
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: optimize-contrast;
-    -ms-interpolation-mode: nearest-neighbor;
-}
-
-
-
-.e, .o, .m, .u, .a, .s, .r{
-    /* height: 20%; */
-    margin-top: 17px;
-}
-
-.l{
-    width: 40px;
-    height:80px;
-}
-
-.uppercase_l, .t{
-    height:100px;
-}
-
-.o{
-    width: 40;
-    height: 40;
-}
-
-.e{
-    width: 60;
-    height: 40;
-}
-
-.y{
-    padding-top: 25px;
-}
-
-.a{
-    width: 40;
-    height: 50;
-}
-
-.word{
-    display:inline-flex;
-    margin-right: 30px;
-    height:70px;
-}
-
-@media (max-width: 479px) {
-    .main{
-        min-height:auto;
+    .main {
+        min-height: 1240px;
+        background-image: url(../images/bricks.png);
     }
-    .loading{
-        font-size: 25;
-        font-family: 'Special Elite', sans-serif;
-        margin-top: 53;
-        margin-left: 105;
+    .introtext {
+        font-size: 3.4em;
+        color: white;
+        margin-top: 25%;
+        max-width: 25%;
+        display: none;
     }
-    .oldtv{
-        margin-top: 0px;
-        margin-left: 0px;
-        width: 365;
+    .introtext>h3>span {
+        text-transform: uppercase;
+        letter-spacing: 10;
+        padding-left: 10px;
+        font-size: .36em;
     }
-    .oldtvremote{
-        content:url(../images/oldtvremotemobile.png);
+    .oldtv {
+        margin-top: 40px;
+        margin-left: 30px;
+        width: 852px;
+        content: url(../images/oldtvnoscreen1_medium.png);
     }
-    .channeldisplay{
-        top: 60;
-        left: 309;
-        width: 25px;
-        height: 22px;
-        font-size: 18px;
+    .channeldisplay {
+        top: 180;
+        left: 755;
+        font-size: 38;
+        width: 55;
+        height: 50;
     }
-    .channelvideocontainer{
-        margin-left: 40px;
-        margin-top: 32px;
-        width: 245;
-        height: 195;
+    .channelvideocontainer {
+        height: 460px;
+        width: 575px;
+        margin-left: 123px;
+        margin-top: 112px;
     }
-    .floorcontainer{
-        top:auto;
-        bottom: 0;
+    .oldtvremote {
+        width: 300px;
+        content: url(../images/oldtvremoteskewed2.png);
     }
-    .hardwood{
-        content:url(../images/hardwood_mobile.png);
-        max-width:102%;
+    .oldtvcontainer {
+        bottom: auto;
     }
-    .rug{
-        top: 30;
-    left: 15;
-    width: 375;
+    .remotebutton {
+        width: 18px;
+        height: 18px;
+        /* background: red; */
+        display: inline-block;
+        position: absolute;
+        z-index: 1000000;
     }
-    .dog{
-        top: -30;
-        left: 10;
-        transform: scaleX(-1);
+    #buttononoff {
+        left: 103px;
+        top: 115px;
     }
-    .barley{
-        width:240;
+    #buttonchannelup {
+        left: 132px;
+        top: 105px;
     }
-    .wallart{
-        top: 210;
-        left: 220;
-        width: 150px;
-        height: 200px;
+    #buttonchanneldown {
+        left: 150px;
+        top: 140px;
+    }
+    #buttonfullscreen {
+        left: 170;
+        top: 173;
+    }
+    #buttonmoreinfo {
+        left: 97;
+        top: 195;
+    }
+    #buttonnumberone {
+        top: 47;
+        left: 40;
+    }
+    #buttonnumbertwo {
+        top: 40;
+        left: 65;
+    }
+    #buttonnumberthree {
+        top: 33;
+        left: 90;
+    }
+    #buttonnumberfour {
+        top: 69;
+        left: 47;
+    }
+    #buttonnumberfive {
+        top: 62;
+        left: 74;
+    }
+    #buttonnumbersix {
+        top: 54;
+        left: 100;
+    }
+    #buttonnumberseven {
+        top: 91;
+        left: 57;
+    }
+    #buttonnumbereight {
+        top: 86;
+        left: 87;
+    }
+    #buttonnumbernine {
+        top: 79;
+        left: 114;
+    }
+    #buttoninvert {
+        top: 183;
+        left: 134;
+    }
+    .tvremotecontainer {
+        left: 650;
+        top: 500;
+        bottom: auto;
+        transform: rotate(0deg);
+    }
+    .moreinfo {
+        width: 400px;
+        height: 550px;
+        border-radius: 5px;
+    }
+    .moreinfocontainer {
+        top: 60px;
+        right: 80px;
+        left: auto;
+    }
+    .wallart {
+        top: 90px;
+        left: 900;
+        width: 270px;
+        height: 360px;
+    }
+    .floorcontainer {
+        top: 1040;
+        width: 100%;
+    }
+    .hardwood {
+        content: url(../images/hardwood1_crop.png);
+        width: 100%;
         z-index: 1;
     }
-    .tvremotecontainer{
-        left: 150;
-        top: 300;
-        transform:rotate(0deg);
+    .rug {
+        top: 60;
+        left: 600;
+        width: 600;
     }
-    .sound{
-        bottom: 7px;
-        left: 7px;
-        filter: invert(1);
+    .dog {
+        top: -70;
+        left: 745;
+        transform: none;
+        z-index: 0;
+    }
+    .barley {
+        width: 500px;
+    }
+    .sound {
+        top: 7px;
+        right: 7px;
+        filter: none;
+    }
+    .castcontainer {
+        padding: 10%;
+        margin: 10%;
+        width: 80%;
+        animation: 20s credits linear infinite;
+    }
+    .cast {
+        font-size: 36;
+    }
+    .creditheader {
+        margin-top: 30px;
+        font-size: 48;
+    }
+    .table {
+        text-align: inherit;
+        width: 80%;
+        margin-top: 50px;
+        display: inline;
+    }
+    .tableheader {
+        text-align: inherit;
+        font-size: 48;
+        margin-top: 100px;
+        margin-bottom: 10px;
+    }
+    .column {
+        width: 48%;
+        padding: 5px;
+        font-size: 24;
+    }
+    .column>div {
+        margin-bottom: 10px;
+    }
+    .columnone {
+        text-align: left;
+        float: left;
+    }
+    .columntwo {
+        float: right;
+        text-align: right;
+    }
+    .userMediaMessage {
+        z-index: 1000000000000;
+        font-size: 24;
+        text-align: center;
+        padding-left: 30%;
+        padding-right: 30%;
+        padding-top: 10%;
+    }
+    .accesswaiting>div {
+        float: left;
+        margin-left: 20px;
+        font-size: 42;
+    }
+    .accesswaiting {
+        display: inline-block;
+        margin-bottom: 30px;
+        margin-left: -20px;
+    }
+    .accessstatus {
+        margin-top: 10px;
+        margin-bottom: 30px;
+    }
+    .sound {
+        height: 40px;
+        width: 40px;
+        top: 5px;
+        right: 5px;
+    }
+    .canvasimage {
+        z-index: -1;
+        display: none;
+    }
+    .canvascontainer {
+        display: inline-block;
+        vertical-align: middle;
+        height: 200px;
+        padding-top: 22%;
+        margin-left: 14%;
+        text-align: left;
+    }
+    .canvasboard {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        /* text-align: center; */
+        z-index: 1000;
+    }
+    .letter {
+        width: 50px;
+        height: 70px;
+        vertical-align: top;
+        z-index: 1;
+        display: inline-flex;
+        image-rendering: optimizeSpeed;
+        image-rendering: -moz-crisp-edges;
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: optimize-contrast;
+        -ms-interpolation-mode: nearest-neighbor;
+    }
+    .e,
+    .o,
+    .m,
+    .u,
+    .a,
+    .s,
+    .r {
+        /* height: 20%; */
+        margin-top: 17px;
+    }
+    .l {
+        width: 40px;
+        height: 80px;
+    }
+    .uppercase_l,
+    .t {
+        height: 100px;
+    }
+    .o {
+        width: 40;
+        height: 40;
+    }
+    .e {
+        width: 60;
+        height: 40;
+    }
+    .y {
+        padding-top: 25px;
+    }
+    .a {
+        width: 40;
+        height: 50;
+    }
+    .word {
+        display: inline-flex;
+        margin-right: 30px;
+        height: 70px;
+    }
+}
+
+@media only screen and (min-width: 480px) and (max-width: 1140px) {
+    .rug {
+        left: 22%;
+    }
+    .dog {
+        left: 25%;
+    }
+    .wallart {
+        top: 650;
+        left: 200;
+    }
+}
+
+@media only screen and (min-width: 480px) and (max-width: 1090px) {
+    .rug {
+        width: 60%;
+    }
+    .barley {
+        width: 58%;
     }
 }

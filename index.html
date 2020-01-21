@@ -3,11 +3,12 @@
 <head>
     <meta content="width=device-width, initial-scale=1" name="viewport" />
     <link rel="icon" href="favicon.ico">
-    <link rel=“preload” href=“https://fonts.googleapis.com/css?family=Special+Elite&display=swap” as=“font”>
-    <link rel=“preload” href=“fonts/FiftiesMovies.ttf” as=“font”>
+    <link rel="stylesheet" type="text/css" href="css/fonts.css">
     <link rel="stylesheet" type="text/css" href="css/main.css">
+    <link rel="stylesheet" type="text/css" href="css/typewriter.css">
     <link rel="stylesheet" type="text/css" href="css/statictv.css">
     <script src="js/jquery-3.4.1-min.js"></script>
+    <script src="js/jqueryui.js"></script>
     <script src="js/jq-ajax-progress.min.js"></script>
     <script src="js/statictv.js"></script>
     <script src="js/oconcept-utility.js"></script>
@@ -18,40 +19,48 @@
     <script src="js/oconcept-channel-videos.js"></script>
     <script src="js/oconcept-main.js"></script>
 </head>
+
 <body>
+    <div class="intro">
+        <div class="introtext">
+            <h3>b.creativ <span>code&design</span></h3>
+        </div>
+    </div>
     <div class="main">
-        <div class="loading">Loading 0%</div>
+        <div class="loading">LOADING</div>
         <div class="sound">
             <img class="yes" src="images/recordsound.png">
             <img class="no" src="images/recordnosound.png">
         </div>
         <div class="oldtvcontainer">
+            <img class="oldtv" src="images/oldtvnoscreen1_tallsmall.png">
             <div class="channeldisplay"></div>
-        </div>
-        <div class="channelvideocontainer">
-            <div class="usertvscreencontainer">
-                <video id="usertvscreen" autoplay></video>
+            <div class="channelvideocontainer">
+                <div class="usertvscreencontainer">
+                    <video id="usertvscreen" autoplay></video>
+                </div>
+                <img class="oldtvscreen" src="images/oldtvscreen.png">
+                <canvas id="statictv" class="tvstaticcontainer"></canvas>
             </div>
-            <img class="oldtvscreen" src="images/oldtvscreen.png">
-            <canvas id="statictv" class="tvstaticcontainer"></canvas>
         </div>
+
         <div class="tvremotecontainer">
-            <img class="oldtvremote" src="images/oldtvremoteskewed2.png">
-            <div id="buttononoff" class="remotebutton"></div>
-            <div id="buttonchannelup" class="remotebutton"></div>
-            <div id="buttonchanneldown" class="remotebutton"></div>
-            <div id="buttonfullscreen" class="remotebutton"></div>
-            <div id="buttonmoreinfo" class="remotebutton"></div>
-            <div id="buttoninvert" class="remotebutton"></div>
-            <div id="buttonnumberone" class="remotebutton"></div>
-            <div id="buttonnumbertwo" class="remotebutton"></div>
-            <div id="buttonnumberthree" class="remotebutton"></div>
-            <div id="buttonnumberfour" class="remotebutton"></div>
-            <div id="buttonnumberfive" class="remotebutton"></div>
-            <div id="buttonnumbersix" class="remotebutton"></div>
-            <div id="buttonnumberseven" class="remotebutton"></div>
-            <div id="buttonnumbereight" class="remotebutton"></div>
-            <div id="buttonnumbernine" class="remotebutton"></div>
+            <img class="oldtvremote" src="images/oldtvremotemobile2.png">
+            <button id="buttononoff" class="remotebutton"></button>
+            <button id="buttonchannelup" class="remotebutton"></button>
+            <button id="buttonchanneldown" class="remotebutton"></button>
+            <button id="buttonfullscreen" class="remotebutton"></button>
+            <button id="buttonmoreinfo" class="remotebutton"></button>
+            <button id="buttoninvert" class="remotebutton"></button>
+            <button id="buttonnumberone" class="remotebutton"></button>
+            <button id="buttonnumbertwo" class="remotebutton"></button>
+            <button id="buttonnumberthree" class="remotebutton"></button>
+            <button id="buttonnumberfour" class="remotebutton"></button>
+            <button id="buttonnumberfive" class="remotebutton"></button>
+            <button id="buttonnumbersix" class="remotebutton"></button>
+            <button id="buttonnumberseven" class="remotebutton"></button>
+            <button id="buttonnumbereight" class="remotebutton"></button>
+            <button id="buttonnumbernine" class="remotebutton"></button>
         </div>
         <div class="wallart">
             <img class="wallartframe" src="images/wallart/frame.png">
@@ -62,7 +71,7 @@
         </div>
         <div class="floorcontainer">
             <div class="hardwoodcontainer">
-                <img class="hardwood" src="images/hardwood1_crop.png">
+                <img class="hardwood">
             </div>
             <img class="rug" src="images/roundrug1.png">
             <div class="dog">
@@ -85,8 +94,9 @@
             <div class="creditheader">Visit the Source Code</div>
             <div class="credit"><a href="">GitHub</a></div>
 
-            <div class="creditheader">Contact at</div>
-            <div class="credit"> <a href="https://seanryanoc.com"></a>seanryanoc.com</div>
+            <div class="creditheader">Check us out @</div>
+            <div class="credit">
+                <a href="https://bcreativ.org"></a>bcreativ.org</div>
 
             <div class="table">
                 <div class="tableheader">Photos</div>
@@ -118,33 +128,31 @@
         <div>
             checking access
         </div>
-            <div class="accesswaiting">
-                <div>
-                    .
-                </div>
-                <div>
-                    .
-                </div>
-                <div>
-                    .
-                </div>
-                <div>
-                    .
-                </div>
-                <div>
-                    .
-                </div>
-                <div>
-                    .
-                </div>
+        <div class="accesswaiting">
+            <div>
+                .
             </div>
-            <div class="accessstatus"></div>
-            <div class="accessstatusyes"></div>
-            <div class="accessstatusno"></div>
+            <div>
+                .
+            </div>
+            <div>
+                .
+            </div>
+            <div>
+                .
+            </div>
+            <div>
+                .
+            </div>
+            <div>
+                .
+            </div>
+        </div>
+        <div class="accessstatus"></div>
+        <div class="accessstatusyes"></div>
+        <div class="accessstatusno"></div>
         <div>
-            Camera access is used for the interactive experience only.
-            We DO NOT stream/save your video anywhere at all.
-            Feel free to deny if you are not comfortable.
+            Camera access is used for the interactive experience only. We DO NOT stream/save your video anywhere at all. Feel free to deny if you are not comfortable.
         </div>
     </div>
 </body>

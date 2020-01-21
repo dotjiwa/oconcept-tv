@@ -1,6 +1,9 @@
 {
     "scripts": {
-        "start": "http-server ."
+        "start": "http-server .",
+        "build": "workbox generateSW ./workbox-config.js",
+        "deploy": "aws s3 sync . s3://tv.bcreativ.org --exclude 'aws/*'  --exclude 'node_modules/*' --exclude 'package.json' --exclude 'package-lock.json'  --exclude '.DS_Store' --exclude '.gitignore' --acl 'public-read' --exclude 'video/_originals/*' --exclude '.git/*'",
+        "deployinval": "aws cloudfront create-invalidation --distribution-id E8U6TXZ1J18FR --path '/*'"
     },
     "dependencies": {
         "http-server": "^0.11.1"
