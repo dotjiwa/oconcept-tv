@@ -5,8 +5,8 @@
 if ('serviceWorker' in navigator) {
     // Use the window load event to keep the page load performant
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js');
-        navigator.serviceWorker.addEventListener('message', event => progress(event.data));
+        // navigator.serviceWorker.register('sw.js');
+        // navigator.serviceWorker.addEventListener('message', event => progress(event.data));
     });
 }
 
@@ -17,6 +17,9 @@ function progress({ loaded, total }) {
 //Page load
 var isMobile;
 $(window).on("load", function() {
+
+    //load wallart images
+    loadWallArt();
 
     //set current screen is mobile flag
     checkForMobile();
@@ -32,10 +35,14 @@ function checkForMobile() {
         isMobile = true;
 }
 
+var directions;
 async function main() {
 
     //show intro and get user media permission
     var introPromise = intro();
+
+    //start directions module
+    directions = new OConceptDirections(isMobile);
 
     //fetch tv animation points
     // var tvPromise = fetchTVAnimationPoints();
@@ -47,12 +54,6 @@ async function main() {
 
     //Start preloading video
     addVideoChannels();
-
-    //start fetching animation points and animation wall art
-    animateWallArt();
-
-    //start dog "gif" 
-    runBarleyGirl();
 }
 
 async function intro() {
@@ -61,7 +62,7 @@ async function intro() {
         // await typeEffect.tellStory(["OConcept", "development"]);
         $(".introtext").addClass("typewriter");
         $(".introtext").css("display", "inline-block");
-        await timeout(4000);
+        await timeout(6000);
         // $(".intro").addClass("introanimate");
         // $(".intro").hide(6000);
         // $(".intro").one("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd", async function() {
@@ -91,69 +92,42 @@ function onIntroEnd(resolve) {
     $(".oldtvcontainer").one("transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd", function() {
         $(".wallart").effect("slide", { direction: "up", mode: 'show', duration: 1500 });
         $(".oldtvremote").effect("slide", { direction: "right", mode: 'show', duration: 1500 });
+        setTimeout(function() {
+            directions.showNextDirection();
+            //start fetching animation points and animation wall art
+            animateWallArt();
+
+            //start dog "gif" 
+            runBarleyGirl();
+        }, 3000);
         registerEvents();
         resolve();
     });
 }
 
-async function animateWallArt() {
-
+async function loadWallArt() {
     var wallArtImages = new OConceptAnimateWallArt().Images;
-    //Load data files
-    for (var i = 0; i < wallArtImages.length; i++) {
-        var wallArtImage = wallArtImages[i];
-
-        //Fetch files to compile all data points for animation
-        var filePrefix = "-partial-";
-        var promises = [];
-        var urls = [];
-        for (var f = 0; f < 10; f++) {
-            //Get Image Data Points
-            urls.push("datafiles/wallart/" + wallArtImage.filename + filePrefix + f.toString() + ".json?requestId=1");
-        }
-
-        await Promise.all(urls.map(u => fetch(u))).then(responses =>
-            Promise.all(responses.map(res => res.json()))).then(values => {
-            wallArtImage.data = [];
-            for (var f = 0; f < values.length; f++) {
-                wallArtImage.data = wallArtImage.data.concat(values[f]);
-            }
-            wallArtImage.data = shuffle(wallArtImage.data);
-            logMessage("Wall art: " + wallArtImage.filename + " successfully constructed. Length: " + wallArtImage.data.length)
-        });
-    }
-
     //Animate images
-    var previousImageFileName = "";
     for (var i = 0; i < wallArtImages.length; i++) {
-
         var wallArtImage = wallArtImages[i];
         var imagePath = "images/wallart/" + wallArtImage.filename + ".png";
+        var img = $("<img class='wallartitem' src='" + imagePath + "'>");
+        $(".wallart").append(img);
+    }
+}
 
-        var art = new OConceptAnimate(
-            wallArtImage.filename, ["wallartcanvas"],
-            imagePath,
-            null,
-            "wallart",
-            wallArtImage.data,
-            500,
-            "all",
-            "toptobottom");
 
-        await art.animateImage().catch((err) => console.log(err));
-
-        await timeout(3000);
-
-        //remove canvas element of previous iteration
-        if (previousImageFileName != "")
-            $("." + previousImageFileName).remove();
-        //save canvas name for removal
-        previousImageFileName = wallArtImage.filename;
+async function animateWallArt() {
+    var wallArtImages = new OConceptAnimateWallArt().Images;
+    var elements = $(".wallartitem");
+    for (var i = 1; i < wallArtImages.length; i++) {
+        await timeout(5000);
+        elements.removeClass("wallartshow");
+        elements[i].classList.add("wallartshow");
 
         //make continuous loop
-        if (i == 19)
+        if (i == wallArtImages.length - 1)
             i = 0;
-
     }
 }
 
@@ -748,9 +722,21 @@ function shuffle(array) {
 }
 
 var audio;
+var isFirstTurnOn = true;
+var isFirstChannelUp = true;
+var isFirstMoreInfo = true;
 
 function registerEvents() {
     $("#buttononoff").on("click", function(e) {
+
+        if (isFirstTurnOn) {
+            directions.hideDirection();
+            setTimeout(function() {
+                directions.showNextDirection();
+            }, 2000);
+            isFirstTurnOn = false;
+        }
+
         //Turn on from off mode
         if (!($("#statictv").is(":visible")) && //is static isnt showing
             !($(".channelvideo").is(":visible"))) { //and channel video isn't playing 
@@ -775,6 +761,13 @@ function registerEvents() {
 
     //Channel up event
     $("#buttonchannelup").on("click", function(e) {
+        if (isFirstChannelUp) {
+            directions.hideDirection();
+            setTimeout(function() {
+                directions.showNextDirection();
+            }, 10000);
+            isFirstChannelUp = false;
+        }
         goToNextChannel();
         updateMoreInfo();
     })
@@ -801,6 +794,16 @@ function registerEvents() {
 
     //More Info event 
     $("#buttonmoreinfo").on("click", function(e) {
+        directions.hideDirection();
+        if (isFirstMoreInfo) {
+            setTimeout(function() {
+                directions.showNextDirection();
+            }, 3000);
+            setTimeout(function() {
+                directions.hideDirection();
+            }, 12000);
+            isFirstMoreInfo = false;
+        }
         if (TVISON) {
             if (currentChannel.channelNumber != 0) {
                 updateMoreInfo();
@@ -813,38 +816,47 @@ function registerEvents() {
     });
 
     $("#buttonnumberone").on("click", function(e) {
+        directions.hideDirection();
         updateChannelSelection(1);
     });
 
     $("#buttonnumbertwo").on("click", function(e) {
+        directions.hideDirection();
         updateChannelSelection(2);
     });
 
     $("#buttonnumberthree").on("click", function(e) {
+        directions.hideDirection();
         updateChannelSelection(3);
     });
 
     $("#buttonnumberfour").on("click", function(e) {
+        directions.hideDirection();
         updateChannelSelection(4);
     });
 
     $("#buttonnumberfive").on("click", function(e) {
+        directions.hideDirection();
         updateChannelSelection(5);
     });
 
     $("#buttonnumbersix").on("click", function(e) {
+        directions.hideDirection();
         updateChannelSelection(6);
     });
 
     $("#buttonnumberseven").on("click", function(e) {
+        directions.hideDirection();
         updateChannelSelection(7);
     });
 
     $("#buttonnumbereight").on("click", function(e) {
+        directions.hideDirection();
         updateChannelSelection(8);
     });
 
     $("#buttonnumbernine").on("click", function(e) {
+        directions.hideDirection();
         updateChannelSelection(9);
     });
 
@@ -852,7 +864,7 @@ function registerEvents() {
     var PAUSEPSYCEDELIC = false;
     var backgroundImageCSSValue;
     $("#buttoninvert").on("click", function(e) {
-
+        directions.hideDirection();
         //invert
         //invertPage();
 
@@ -965,11 +977,15 @@ function openFullscreen(elem) {
     } else if (elem.mozRequestFullScreen) { /* Firefox */
         elem.mozRequestFullScreen();
     } else if (elem.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
-        elem.webkitRequestFullscreen();
+        if (isMobile)
+            elem.webkitEnterFullscreen()
+        else
+            elem.webkitRequestFullscreen();
     } else if (elem.msRequestFullscreen) { /* IE/Edge */
         elem.msRequestFullscreen();
     }
 }
+
 
 function closeFullscreen() {
     if (document.exitFullscreen) {
