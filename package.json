@@ -6,6 +6,6 @@
         "deployinval": "aws cloudfront create-invalidation --distribution-id E8U6TXZ1J18FR --path '/*'"
     },
     "dependencies": {
-        "http-server": "^0.11.1"
+        "http-server": "^0.11.2"
     }
 }
